@@ -1,0 +1,30 @@
+{% extends 'cfaa/base.html' %}
+
+{% block title %}Discovery Page{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-4">Discovery Page</h1>
+
+    <!-- Search Bar -->
+    <form method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Search for articles..." value="{{ request.GET.q }}">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+    </form>
+
+    <!-- Articles Grid -->
+    <div class="row">
+        {% for article in articles %}
+        <div class="col-md-6">
+            <div class="tile">
+                <h2>{{ article.title }}</h2>
+                <p>{{ article.content|truncatewords:30 }}</p>
+                <a href="{% url 'report' article.id %}" class="btn btn-secondary btn-sm">Read more</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

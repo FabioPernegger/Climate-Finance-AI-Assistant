@@ -1,0 +1,45 @@
+{% extends 'cfaa/base.html' %}
+
+{% block title %}{{ report.title }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- Main Report Tile -->
+        <div class="col-lg-8">
+            <div class="main-tile">
+                <h1>{{ report.title }}</h1>
+                <p class="text-muted">{{ report.published_date|date:"F j, Y" }}</p>
+                <div>{{ report.content }}</div>
+            </div>
+
+            <!-- Update Tile -->
+            <div class="update-tile">
+                <h4>Updates</h4>
+                <ul class="list-group list-group-flush">
+                    {% for article in related_articles %}
+                    <li class="list-group-item">
+                        <a href="{% url 'report' article.id %}" class="text-decoration-none">{{ article.title }}</a>
+                        <p class="text-muted mb-1">{{ article.published_date|date:"F j, Y" }}</p>
+                        <p>{{ article.content|truncatewords:20 }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Sidebar with Additional News Articles -->
+        <div class="col-lg-4">
+            <h4 class="mb-3">Latest News</h4>
+            {% for article in new_articles %}
+            <div class="news-tile">
+                <h5><a href="{% url 'report' article.id %}" class="text-decoration-none">{{ article.title }}</a></h5>
+                <p class="text-muted">{{ article.published_date|date:"F j, Y" }}</p>
+                <p>{{ article.content|truncatewords:15 }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
