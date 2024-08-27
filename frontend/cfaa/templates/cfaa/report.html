@@ -1,44 +1,111 @@
 {% extends 'cfaa/base.html' %}
 
-{% block title %}{{ report.title }}{% endblock %}
+{% block title %}Report Page{% endblock %}
 
 {% block content %}
 <div class="container my-5">
-    <!-- Main Content Row -->
+    <!-- Question Section -->
+    <div class="question-section mb-4">
+        <h5 class="question-text">What are the opinions of stakeholders over the past six months regarding the recent policy targeting a 30% reduction in carbon emissions over the next decade, particularly concerning its impact on fossil fuel-dependent industries in the United States, and what are the forecasted developments in these opinions?</h5>
+    </div>
+
+    <!-- Timeline Section -->
+    <div class="timeline-section mb-4">
+        <div class="timeline d-flex justify-content-around">
+            <button class="btn btn-light">June 11th</button>
+            <button class="btn btn-light">June 12th</button>
+            <button class="btn btn-light">June 13th</button>
+            <button class="btn btn-light">June 14th</button>
+            <button class="btn btn-light">June 15th</button>
+            <button class="btn btn-light">June 16th</button>
+            <button class="btn btn-primary">June 17th</button>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
     <div class="row">
-        <!-- Main Report Tile -->
+        <!-- Left Column (Main Report) -->
         <div class="col-lg-8">
-            <div class="main-tile">
-                <h1>{{ report.title }}</h1>
-                <p class="text-muted">{{ report.published_date|date:"F j, Y" }}</p>
-                <div>{{ report.content }}</div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Major updates from June 16th</h5>
+                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+                    <ul>
+                        <li>Lorem ipsum dolor sit amet</li>
+                        <li>Consectetur adipiscing elit</li>
+                        <li>Integer nec odio</li>
+                        <li>Praesent libero</li>
+                    </ul>
+                </div>
             </div>
 
-            <!-- Update Tile -->
-            <div class="update-tile">
-                <h4>Updates</h4>
-                <ul class="list-group list-group-flush">
-                    {% for article in related_articles %}
-                    <li class="list-group-item">
-                        <a href="{% url 'report' article.id %}" class="text-decoration-none">{{ article.title }}</a>
-                        <p class="text-muted mb-1">{{ article.published_date|date:"F j, Y" }}</p>
-                        <p>{{ article.content|truncatewords:20 }}</p>
-                    </li>
-                    {% endfor %}
-                </ul>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">State of knowledge report</h5>
+                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...</p>
+                    <h6>Subheading One</h6>
+                    <ul>
+                        <li>Lorem ipsum dolor sit amet</li>
+                        <li>Consectetur adipiscing elit</li>
+                        <li>Integer nec odio</li>
+                        <li>Praesent libero</li>
+                    </ul>
+                    <h6>Subheading Two</h6>
+                    <ul>
+                        <li>Suspense potenti</li>
+                        <li>Nunc feugiat mi a tellus</li>
+                        <li>Vestibulum sapien</li>
+                        <li>Proin quam</li>
+                    </ul>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+                </div>
             </div>
+
+
         </div>
 
-        <!-- Sidebar with Additional News Articles -->
+        <!-- Right Column (Charts and Articles) -->
         <div class="col-lg-4">
-            <h4 class="mb-3">Latest News</h4>
-            {% for article in new_articles %}
-            <div class="news-tile">
-                <h5><a href="{% url 'report' article.id %}" class="text-decoration-none">{{ article.title }}</a></h5>
-                <p class="text-muted">{{ article.published_date|date:"F j, Y" }}</p>
-                <p>{{ article.content|truncatewords:15 }}</p>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Opinion change over</h5>
+                    <!-- Placeholder for Chart -->
+                    <div id="opinionChart" style="height: 200px;">
+                        <!-- Chart.js or other chart library can be used here -->
+                        <canvas id="opinionChangeChart"></canvas>
+                    </div>
+                </div>
             </div>
-            {% endfor %}
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Article 3</h5>
+                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque...</p>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <li class="page-item"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item active"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">4</a></li>
+                            <li class="page-item"><a class="page-link" href="#">5</a></li>
+                            <li class="page-item"><a class="page-link" href="#">...</a></li>
+                            <li class="page-item"><a class="page-link" href="#">20</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Forecast</h5>
+                    <div id="forecastChart" style="height: 200px;">
+                        <!-- Placeholder for Forecast Chart -->
+                        <canvas id="forecastChartCanvas"></canvas>
+                    </div>
+                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>

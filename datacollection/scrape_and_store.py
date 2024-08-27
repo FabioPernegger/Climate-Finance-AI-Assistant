@@ -26,12 +26,12 @@ cursor = conn.cursor()
 
 # add query to db
 cursor.execute('''
-                    INSERT INTO queries (text, search_query)
+                    INSERT INTO cfaa_query (text, search_query)
                     VALUES (?, ?)
                     ''', (query_text, search_query))
 conn.commit()
 
-cursor.execute("SELECT id FROM queries WHERE text = ?", (query_text,))
+cursor.execute("SELECT id FROM cfaa_query WHERE text = ?", (query_text,))
 query_id = cursor.fetchone()[0]
 
 
@@ -57,7 +57,7 @@ for date_begin, date_end in zip(dates_begin, dates_end):
 
             else:
                 cursor.execute('''
-                    INSERT INTO articles (queryid, publishdate, title, text, url)
+                    INSERT INTO cfaa_article (query_id, publish_date, title, text, url)
                     VALUES (?, ?, ?, ?, ?)
                     ''', (query_id, article.publish_date, article.title, article.text, url))
                 conn.commit()
