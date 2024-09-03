@@ -1,0 +1,93 @@
+.navbar {
+    background-color: #003366;
+}
+
+.navbar-brand {
+    color: #fff;
+    font-weight: bold;
+}
+
+.navbar-brand:hover {
+    color: #ffcc00;
+}
+
+.nav-link {
+    color: #fff;
+}
+
+.nav-link:hover {
+    color: #ffcc00;
+}
+
+.navbar-nav .nav-item .nav-link.active {
+    color: #ffcc00;
+}
+
+.search-bar {
+    position: relative;
+}
+
+.search-bar input {
+    border-radius: 20px;
+    padding-left: 35px;
+}
+
+.search-bar .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+.notification-icon {
+    position: relative;
+    color: #fff;
+}
+
+.notification-icon .badge {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    background-color: #ffcc00;
+    color: #003366;
+}
+
+.profile-link {
+    color: #fff;
+    font-weight: bold;
+}
+
+.profile-link:hover {
+    color: #ffcc00;
+}
+
+/*dashboard*/
+
+.list-group-item {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.topic-info h5 {
+    margin: 0;
+}
+
+.topic-status {
+    display: flex;
+    align-items: center;
+}
+
+.badge-primary {
+    background-color: #ffc107;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+}

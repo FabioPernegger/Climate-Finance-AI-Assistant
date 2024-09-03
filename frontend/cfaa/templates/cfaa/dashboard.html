@@ -2,7 +2,10 @@
 
 {% block title %}Dashboard{% endblock %}
 
+{% load static %}
+
 {% block content %}
+<link href="{% static 'cfaa/css/main.css' %}" rel="stylesheet">
 <div class="container my-5">
     <h3>Monitored Topics</h3>
     <div class="list-group">
