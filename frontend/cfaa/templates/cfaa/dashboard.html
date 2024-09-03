@@ -1,0 +1,25 @@
+{% extends 'cfaa/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h3>Monitored Topics</h3>
+    <div class="list-group">
+        {% for topic in monitored_topics %}
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="topic-info">
+                <h5>{{ topic.title }}</h5>
+                <span>{{ topic.new_articles }} new articles</span>
+            </div>
+            <div class="topic-status">
+                <span class="badge badge-primary">{{ topic.status }}</span>
+                <a href="{{ topic.url }}" class="btn btn-outline-primary ml-2">
+                    <i class="fas fa-arrow-right"></i> <!-- FontAwesome icon for right arrow -->
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

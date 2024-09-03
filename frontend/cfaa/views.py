@@ -3,6 +3,25 @@ from .models import Article
 from .models import Query
 from datetime import datetime
 
+
+def dashboard(request):
+    # Example data; replace with real queries and article counts from your database
+    monitored_topics = [
+        {
+            'title': 'Carbon emission policies, US, Opinion',
+            'new_articles': 27,
+            'status': 'Major change',
+            'url': '/reports/1/'  # Replace with the correct report URL
+        },
+        {
+            'title': 'Carbon emission goals, EU, Event occurrence',
+            'new_articles': 13,
+            'status': 'No significant changes',
+            'url': '/reports/2/'  # Replace with the correct report URL
+        }
+    ]
+    return render(request, 'cfaa/dashboard.html', {'monitored_topics': monitored_topics})
+
 def discovery_page(request): #, queryid=1):
     # Get the Query object or return 404 if not found
     query = get_object_or_404(Query, id=1)
