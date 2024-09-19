@@ -1,25 +1,24 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Article
 from .models import Query
+from .models import Topic
 from datetime import datetime
 
 
 def dashboard(request):
     # Example data; replace with real queries and article counts from your database
-    monitored_topics = [
-        {
-            'title': 'Carbon emission policies, US, Opinion',
-            'new_articles': 27,
-            'status': 'Major change',
-            'url': '/reports/1/'  # Replace with the correct report URL
-        },
-        {
-            'title': 'Carbon emission goals, EU, Event occurrence',
-            'new_articles': 13,
-            'status': 'No significant changes',
-            'url': '/reports/2/'  # Replace with the correct report URL
-        }
-    ]
+    topics = Topic.objects.all()
+
+    # Prepare the monitored_topics dictionary from the queried data
+    monitored_topics = []
+    for topic in topics:
+        monitored_topics.append({
+            'title': topic.title,
+            'new_articles': 10,  # Get the count of associated articles
+            'status': 'No significant changes',  # You can adjust the logic to determine the status
+            'url': f'/reports/{topic.id}/'  # You can adjust this to link to a detailed report page
+        })
+
     return render(request, 'cfaa/dashboard.html', {'monitored_topics': monitored_topics})
 
 def discovery_page(request): #, queryid=1):

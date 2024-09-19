@@ -91,3 +91,53 @@
     border-color: #007bff;
     color: #007bff;
 }
+
+
+/*discovery*/
+
+/* Make the Monitor Question button bigger and full-width */
+.btn-monitor {
+    width: 100%; /* Full width to match the summary card */
+    padding: 15px 0; /* Increase padding for height */
+    font-size: 18px; /* Increase font size for prominence */
+    font-weight: bold; /* Make the text bold */
+    text-transform: uppercase; /* Optional: make the text uppercase */
+}
+
+/* Apply to the entire page layout */
+.fixed-layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh; /* Full viewport height */
+}
+
+/* Ensure the question section stays fixed */
+.question-section {
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Wraps both the scrollable article section and the fixed summary section */
+.content-wrapper {
+    display: flex;
+    flex-grow: 1; /* Fills the remaining vertical space */
+    overflow: hidden; /* Prevents the entire layout from scrolling */
+}
+
+/* Only the article section should be scrollable */
+.scrollable-articles {
+    overflow-y: auto; /* Make this section scrollable */
+    height: 100%; /* Takes up available space */
+}
+
+/* Make the summary section and button fixed */
+.summary-tile {
+    position: sticky;
+    top: 0; /* Keep the summary card and button fixed at the top */
+    align-self: flex-start;
+}
+
+/* Optional: Adjust card margins for consistency */
+.card {
+    margin-top: 10px;
+}
+

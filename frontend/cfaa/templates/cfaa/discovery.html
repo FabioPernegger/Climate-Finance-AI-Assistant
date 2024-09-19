@@ -6,25 +6,16 @@
 
 {% block content %}
 <link href="{% static 'cfaa/css/main.css' %}" rel="stylesheet">
-<div class="container my-5">
-    <!-- Question Section -->
+<div class="container my-5 fixed-layout">
+    <!-- Question Section (Fixed) -->
     <div class="question-section mb-4">
         <h5 class="question-text">What are the opinions of stakeholders over the past six months regarding the recent policy targeting a 30% reduction in carbon emissions over the next decade, particularly concerning its impact on fossil fuel-dependent industries in the United States, and what are the forecasted developments in these opinions?</h5>
     </div>
 
-    <!-- Timeline Section -->
-    <div class="timeline-section mb-4">
-        <div class="timeline d-flex justify-content-around">
-            {% for month, articles in articles_by_month.items %}
-            <button class="btn btn-light">{{ month|date:"F" }}</button>
-            {% endfor %}
-        </div>
-    </div>
-
     <!-- Articles and Summary Grid -->
-    <div class="row">
-        <!-- Articles Section -->
-        <div class="col-lg-9">
+    <div class="row content-wrapper">
+        <!-- Articles Section (Scrollable) -->
+        <div class="col-lg-9 scrollable-articles">
             <div class="row">
                 {% for month, articles in articles_by_month.items %}
                     {% for article in articles %}
@@ -41,20 +32,19 @@
             </div>
         </div>
 
-        <!-- Summary Section -->
-        <div class="col-lg-3">
-            <div class="card summary-tile">
+        <!-- Summary Section (Fixed) -->
+        <div class="col-lg-3 summary-tile">
+            <!-- Monitor Question Button (Bigger and Full Width) -->
+            <div class="text-center mb-3">
+                <button class="btn btn-success btn-monitor">Monitor Question</button>
+            </div>
+            <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Summary</h5>
                     <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque. Duis vulputate commodo lectus.</p>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Monitor Question Button -->
-    <div class="text-right mt-4 offset-lg-10">
-        <button class="btn btn-success">Monitor Question</button>
     </div>
 </div>
 {% endblock %}
