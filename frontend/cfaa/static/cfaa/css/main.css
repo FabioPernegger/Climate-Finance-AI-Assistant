@@ -1,5 +1,5 @@
 .navbar {
-    background-color: #003366;
+    background-color: #001c3e;
 }
 
 .navbar-brand {
@@ -8,7 +8,7 @@
 }
 
 .navbar-brand:hover {
-    color: #ffcc00;
+    color: #ffc107;
 }
 
 .nav-link {
@@ -16,11 +16,11 @@
 }
 
 .nav-link:hover {
-    color: #ffcc00;
+    color: #ffc107;
 }
 
 .navbar-nav .nav-item .nav-link.active {
-    color: #ffcc00;
+    color: #ffc107;
 }
 
 .search-bar {
@@ -49,7 +49,7 @@
     position: absolute;
     top: -5px;
     right: -10px;
-    background-color: #ffcc00;
+    background-color: #ffc107;
     color: #003366;
 }
 
@@ -59,7 +59,7 @@
 }
 
 .profile-link:hover {
-    color: #ffcc00;
+    color: #ffc107;
 }
 
 /*dashboard*/
@@ -139,5 +139,23 @@
 /* Optional: Adjust card margins for consistency */
 .card {
     margin-top: 10px;
+}
+
+/* Report*/
+
+.related-articles .article-box {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.related-articles .article-box h6 {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.related-articles .article-box a {
+    font-size: 0.9rem;
+    color: #007bff;
 }
 

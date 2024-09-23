@@ -9,7 +9,9 @@
 <div class="container my-5 fixed-layout">
     <!-- Question Section (Fixed) -->
     <div class="question-section mb-4">
-        <h5 class="question-text">What are the opinions of stakeholders over the past six months regarding the recent policy targeting a 30% reduction in carbon emissions over the next decade, particularly concerning its impact on fossil fuel-dependent industries in the United States, and what are the forecasted developments in these opinions?</h5>
+        <h5 class="question-text" data-query-id="{{ query_id }}" data-query="{{ query }}">
+            {{ query }}
+        </h5>
     </div>
 
     <!-- Articles and Summary Grid -->
@@ -36,7 +38,13 @@
         <div class="col-lg-3 summary-tile">
             <!-- Monitor Question Button (Bigger and Full Width) -->
             <div class="text-center mb-3">
-                <button class="btn btn-success btn-monitor">Monitor Question</button>
+                {% if is_monitored %}
+            <!-- If the question is already being monitored, disable the button -->
+            <button class="btn btn-secondary btn-monitor" disabled>Already Monitoring</button>
+        {% else %}
+            <!-- If not being monitored, show the active Monitor button -->
+            <button class="btn btn-warning btn-monitor ">Monitor Question</button>
+        {% endif %}
             </div>
             <div class="card">
                 <div class="card-body">
@@ -47,4 +55,66 @@
         </div>
     </div>
 </div>
+
+<!-- Add JavaScript at the bottom -->
+<script>
+// Function to handle the Monitor Question button click
+document.querySelector('.btn-monitor').addEventListener('click', function() {
+    // Extract the question text from the h5 element
+    const questionElement = document.querySelector('.question-text');
+    const queryText = questionElement.getAttribute('data-query');
+    const queryId = questionElement.getAttribute('data-query-id');
+
+    // Data to send (the extracted question)
+    const data = {
+        query: queryText,  // Send the question text as part of the AJAX request
+        query_id: queryId,
+    };
+
+    // Send an AJAX POST request to the Django view
+    fetch('/monitor-question/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()  // Use Django's CSRF token for security
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            console.log('Success:', data.message);
+            // Disable the button and change its appearance
+            const monitorButton = document.querySelector('.btn-monitor');
+            monitorButton.disabled = true;  // Disable the button
+            //monitorButton.classList.add('btn-disabled');  // Add a class to change the appearance
+            //monitorButton.textContent = 'Monitoring...';  // Optionally update the button text
+        } else {
+            console.error('Error:', data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+
+// Function to get CSRF token (Django requires CSRF tokens for POST requests)
+function getCSRFToken() {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, 10) === 'csrftoken=') {
+                cookieValue = decodeURIComponent(cookie.substring(10));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
+
+</script>
 {% endblock %}

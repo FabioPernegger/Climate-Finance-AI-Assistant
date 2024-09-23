@@ -9,19 +9,17 @@
 <div class="container my-5">
     <!-- Question Section -->
     <div class="question-section mb-4">
-        <h5 class="question-text">What are the opinions of stakeholders over the past six months regarding the recent policy targeting a 30% reduction in carbon emissions over the next decade, particularly concerning its impact on fossil fuel-dependent industries in the United States, and what are the forecasted developments in these opinions?</h5>
+        <h5 class="question-text">{{ query }}</h5>
     </div>
 
     <!-- Timeline Section -->
     <div class="timeline-section mb-4">
         <div class="timeline d-flex justify-content-around">
-            <button class="btn btn-light">June 11th</button>
-            <button class="btn btn-light">June 12th</button>
-            <button class="btn btn-light">June 13th</button>
-            <button class="btn btn-light">June 14th</button>
-            <button class="btn btn-light">June 15th</button>
-            <button class="btn btn-light">June 16th</button>
-            <button class="btn btn-primary">June 17th</button>
+            {% for report_entry in query_reports %}
+                <a href="{% url 'report' report_entry.id %}" class="btn {% if report_entry.id == report.id %}btn-primary{% else %}btn-light{% endif %}">
+                    {{ report_entry.creation_day|date:"F jS" }}
+                </a>
+            {% endfor %}
         </div>
     </div>
 
@@ -29,87 +27,85 @@
     <div class="row">
         <!-- Left Column (Main Report) -->
         <div class="col-lg-8">
-
+            <!-- Update Section (Non-Editable) -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <h5 class="card-title">Major updates from June 16th</h5>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
-                    <ul>
-                        <li>Lorem ipsum dolor sit amet</li>
-                        <li>Consectetur adipiscing elit</li>
-                        <li>Integer nec odio</li>
-                        <li>Praesent libero</li>
-                    </ul>
+                    <h5 class="card-title">Update</h5>
+                    <p class="card-text">{{ report.update }}</p>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">State of knowledge report</h5>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...</p>
-                    <h6>Subheading One</h6>
-                    <ul>
-                        <li>Lorem ipsum dolor sit amet</li>
-                        <li>Consectetur adipiscing elit</li>
-                        <li>Integer nec odio</li>
-                        <li>Praesent libero</li>
-                    </ul>
-                    <h6>Subheading Two</h6>
-                    <ul>
-                        <li>Suspense potenti</li>
-                        <li>Nunc feugiat mi a tellus</li>
-                        <li>Vestibulum sapien</li>
-                        <li>Proin quam</li>
-                    </ul>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+            <!-- Form for Editable State of Knowledge -->
+            <form method="POST">
+                {% csrf_token %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">State of Knowledge</h5>
+                        <!-- TinyMCE Editor for the report.text field -->
+                        <textarea id="report_text_editor" name="report_text">{{ report.text }}</textarea>
+                        <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+                    </div>
                 </div>
-            </div>
-
-
+            </form>
         </div>
 
-        <!-- Right Column (Charts and Articles) -->
+        <!-- Right Column (Related Articles with Pagination) -->
         <div class="col-lg-4">
             <div class="card mb-4">
                 <div class="card-body">
-                    <h5 class="card-title">Opinion change over</h5>
-                    <!-- Placeholder for Chart -->
-                    <div id="opinionChart" style="height: 200px;">
-                        <!-- Chart.js or other chart library can be used here -->
-                        <canvas id="opinionChangeChart"></canvas>
+                    <h5 class="card-title">Related Articles</h5>
+                    <div class="related-articles">
+                        {% for article in page_obj %}
+                        <div class="article-box mb-3">
+                            <h6>{{ article.title }}</h6>
+                            <p>{{ article.text|truncatewords:25 }}</p>
+                            <a href="{{ article.url }}" target="_blank">Read more</a>
+                        </div>
+                        {% endfor %}
                     </div>
-                </div>
-            </div>
 
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Article 3</h5>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque...</p>
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination">
-                            <li class="page-item"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item active"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item"><a class="page-link" href="#">4</a></li>
-                            <li class="page-item"><a class="page-link" href="#">5</a></li>
-                            <li class="page-item"><a class="page-link" href="#">...</a></li>
-                            <li class="page-item"><a class="page-link" href="#">20</a></li>
+                    <!-- Pagination Controls -->
+                    <nav aria-label="Related Articles Navigation">
+                        <ul class="pagination justify-content-center mt-3">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                            {% endif %}
+                            {% for num in paginator.page_range %}
+                            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endfor %}
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            {% endif %}
                         </ul>
                     </nav>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Forecast</h5>
-                    <div id="forecastChart" style="height: 200px;">
-                        <!-- Placeholder for Forecast Chart -->
-                        <canvas id="forecastChartCanvas"></canvas>
-                    </div>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Include TinyMCE CDN -->
+<script src="https://cdn.tiny.cloud/1/0z9qhkgqssq6s2vutt5vici795t9k3lp6z3bef4wncbc2os9/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+
+<!-- Initialize TinyMCE for the Report Text Editor -->
+<script>
+    tinymce.init({
+        selector: '#report_text_editor',
+        menubar: false,
+        plugins: 'lists link image table',
+        toolbar: 'undo redo | bold italic | bullist numlist | link image | table',
+        height: 300,
+        setup: function (editor) {
+            editor.on('change', function () {
+                editor.save();  // Ensure the editor content is synced with the textarea for form submission
+            });
+        }
+    });
+</script>
 {% endblock %}

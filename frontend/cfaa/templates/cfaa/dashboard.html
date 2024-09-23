@@ -6,7 +6,8 @@
 
 {% block content %}
 <link href="{% static 'cfaa/css/main.css' %}" rel="stylesheet">
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <div class="container my-5">
     <h3>Monitored Topics</h3>
     <div class="list-group">
@@ -17,7 +18,7 @@
                 <span>{{ topic.new_articles }} new articles</span>
             </div>
             <div class="topic-status">
-                <a href="{{ topic.url }}" class="btn btn-outline-primary ml-2">
+                <a href="{{ report_url }}" class="btn btn-outline-warning ml-2">
                     <i class="fas fa-arrow-right"></i> <!-- FontAwesome icon for right arrow -->
                 </a>
             </div>
