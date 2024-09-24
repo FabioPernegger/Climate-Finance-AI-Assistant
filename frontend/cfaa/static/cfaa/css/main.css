@@ -92,6 +92,17 @@
     color: #007bff;
 }
 
+.btn-delete-topic {
+    color: #dc3545;
+    border-color: #dc3545;
+    transition: background-color 0.2s ease;
+}
+
+.btn-delete-topic:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
 
 /*discovery*/
 
@@ -142,6 +153,26 @@
 }
 
 /* Report*/
+
+.related-articles .article-box {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.related-articles .article-box h6 {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.related-articles .article-box a {
+    font-size: 0.9rem;
+    color: #007bff;
+}
+
+.timeline .btn {
+    margin-right: 5px;
+}
 
 .related-articles .article-box {
     border: 1px solid #ddd;

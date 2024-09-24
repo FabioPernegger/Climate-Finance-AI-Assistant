@@ -39,12 +39,12 @@
             <!-- Monitor Question Button (Bigger and Full Width) -->
             <div class="text-center mb-3">
                 {% if is_monitored %}
-            <!-- If the question is already being monitored, disable the button -->
-            <button class="btn btn-secondary btn-monitor" disabled>Already Monitoring</button>
-        {% else %}
-            <!-- If not being monitored, show the active Monitor button -->
-            <button class="btn btn-warning btn-monitor ">Monitor Question</button>
-        {% endif %}
+                    <!-- If the question is already being monitored, disable the button -->
+                    <button class="btn btn-secondary btn-monitor" disabled>Already Monitoring</button>
+                {% else %}
+                    <!-- If not being monitored, show the active Monitor button -->
+                    <button class="btn btn-warning btn-monitor">Monitor Question</button>
+                {% endif %}
             </div>
             <div class="card">
                 <div class="card-body">
@@ -84,11 +84,12 @@ document.querySelector('.btn-monitor').addEventListener('click', function() {
     .then(data => {
         if (data.message) {
             console.log('Success:', data.message);
-            // Disable the button and change its appearance
+            // Disable the button and change its appearance and text
             const monitorButton = document.querySelector('.btn-monitor');
             monitorButton.disabled = true;  // Disable the button
-            //monitorButton.classList.add('btn-disabled');  // Add a class to change the appearance
-            //monitorButton.textContent = 'Monitoring...';  // Optionally update the button text
+            monitorButton.classList.remove('btn-warning');  // Remove the warning class
+            monitorButton.classList.add('btn-secondary');  // Add the disabled style
+            monitorButton.textContent = 'Already Monitoring';  // Update the button text
         } else {
             console.error('Error:', data.error);
         }
@@ -113,8 +114,6 @@ function getCSRFToken() {
     }
     return cookieValue;
 }
-
-
-
 </script>
+
 {% endblock %}

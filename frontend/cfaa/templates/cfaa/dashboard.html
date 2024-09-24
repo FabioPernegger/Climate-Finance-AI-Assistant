@@ -10,6 +10,9 @@
 
 <div class="container my-5">
     <h3>Monitored Topics</h3>
+
+    {% if has_topics %}
+    <!-- Display monitored topics -->
     <div class="list-group">
         {% for topic in monitored_topics %}
         <div class="list-group-item d-flex justify-content-between align-items-center">
@@ -18,12 +21,69 @@
                 <span>{{ topic.new_articles }} new articles</span>
             </div>
             <div class="topic-status">
-                <a href="{{ report_url }}" class="btn btn-outline-warning ml-2">
-                    <i class="fas fa-arrow-right"></i> <!-- FontAwesome icon for right arrow -->
+                <!-- Delete Button with Trashcan Icon -->
+                <button class="btn btn-outline-danger ml-2 btn-delete-topic" data-topic-id="{{ topic.id }}">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <a href="{{ topic.url }}" class="btn btn-outline-warning ml-2">
+                    <i class="fas fa-arrow-right"></i>
                 </a>
             </div>
         </div>
         {% endfor %}
     </div>
+    {% else %}
+    <!-- Placeholder when no topics exist -->
+    <div class="list-group-item d-flex justify-content-between align-items-center">
+        <div class="topic-info">
+            <h5>No topics created yet!</h5>
+            <p>Use the search bar at the top to add a query and discover a new topic.</p>
+        </div>
+    </div>
+    {% endif %}
 </div>
+
+<!-- JavaScript for handling the delete request -->
+<script>
+    document.querySelectorAll('.btn-delete-topic').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const topicId = this.getAttribute('data-topic-id');
+            const confirmed = confirm('Are you sure you want to delete this topic?');  // Confirm before deleting
+            if (confirmed) {
+                fetch(`/delete-topic/${topicId}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': getCSRFToken(),  // CSRF token for security
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Topic deleted successfully');
+                        window.location.reload();  // Reload the page after successful deletion
+                    } else {
+                        alert('Error deleting the topic');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        });
+    });
+
+    // Function to get CSRF token (Django requires CSRF tokens for POST/DELETE requests)
+    function getCSRFToken() {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, 10) === 'csrftoken=') {
+                    cookieValue = decodeURIComponent(cookie.substring(10));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+
 {% endblock %}

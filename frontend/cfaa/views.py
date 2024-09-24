@@ -8,33 +8,54 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import date
 from django.core.paginator import Paginator
+from django.views.decorators.http import require_http_methods
 
 
 
 
+
+from django.shortcuts import render
+from .models import Topic
 
 def dashboard(request):
     # Fetch all topics
     topics = Topic.objects.all()
 
-    # Prepare the monitored_topics list with the latest report URLs
+    # Check if there are any topics
     monitored_topics = []
-    for topic in topics:
-        # Get the latest report for the current topic
-        latest_report = topic.reports.order_by('-creation_day').first()  # Fetch latest report based on creation day
+    if topics.exists():
+        for topic in topics:
+            # Get the latest report for the current topic
+            latest_report = topic.reports.order_by('-creation_day').first()  # Fetch latest report based on creation day
 
-        # Construct the URL for the latest report manually, using its ID
-        report_url = f'/report/{latest_report.id}/' if latest_report else 1
+            # Construct the URL for the latest report manually, using its ID
+            report_url = f'/report/{latest_report.id}/' if latest_report else '#'
 
-        # Add the topic information, including the URL for the latest report
-        monitored_topics.append({
-            'title': topic.title,
-            'new_articles': topic.articles.count(),  # Get the count of associated articles
-            'status': 'No significant changes',  # You can adjust the logic to determine the status
-            'url': report_url  # Link to latest report if available
-        })
+            # Add the topic information, including the URL for the latest report and topic id
+            monitored_topics.append({
+                'id': topic.id,  # Add the topic ID
+                'title': topic.title,
+                'new_articles': topic.articles.count(),  # Get the count of associated articles
+                'status': 'No significant changes',  # Adjust the logic to determine the status
+                'url': report_url  # Link to the latest report if available
+            })
 
-    return render(request, 'cfaa/dashboard.html', {'monitored_topics': monitored_topics, 'report_url': report_url})
+    # Pass information about topics to the template
+    return render(request, 'cfaa/dashboard.html', {
+        'monitored_topics': monitored_topics,
+        'has_topics': topics.exists(),  # Boolean to check if there are topics
+    })
+
+def delete_topic(request, topic_id):
+    # Get the topic by ID
+    topic = get_object_or_404(Topic, id=topic_id)
+
+    # Delete the topic
+    topic.delete()
+    #Topic.objects.all().delete()
+
+    # Return a success response
+    return JsonResponse({'message': 'Topic deleted successfully'}, status=200)
 
 def discovery_page(request): #, queryid=1):
     # Get the Query object or return 404 if not found
@@ -63,12 +84,16 @@ def discovery_page(request): #, queryid=1):
         'articles_by_month': articles_by_month,
     })
 
+
 def report_page(request, report_id):
-    # Fetch the report using the report_id
+    # Fetch the current report using the report_id
     report = get_object_or_404(Report, id=report_id)
 
     # Fetch the query related to this report
     query = get_object_or_404(Query, id=report.query_id)
+
+    # Fetch all reports associated with the same query_id for the timeline
+    query_reports = Report.objects.filter(query=query).order_by('creation_day')
 
     # Get all ReportArticle objects related to this report
     related_report_articles = ReportArticle.objects.filter(report=report)
@@ -77,9 +102,9 @@ def report_page(request, report_id):
     related_articles = Article.objects.filter(report_articles__in=related_report_articles)
 
     # Implement pagination, display 2 articles per page
-    paginator = Paginator(related_articles, 2)  # 2 articles per page
-    page_number = request.GET.get('page', 1)  # Get page number from request (default is 1)
-    page_obj = paginator.get_page(page_number)  # Paginated articles
+    paginator = Paginator(related_articles, 2)  # Show 2 articles per page
+    page_number = request.GET.get('page', 1)  # Get the page number from the request
+    page_obj = paginator.get_page(page_number)  # Get the articles for the current page
 
     if request.method == 'POST':
         # Get the submitted text from the TinyMCE editor
@@ -94,9 +119,11 @@ def report_page(request, report_id):
     return render(request, 'cfaa/report.html', {
         'query': query.text,  # Pass the query text to the template
         'report': report,  # Pass the current report object
+        'query_reports': query_reports,  # Pass all reports for the timeline
         'page_obj': page_obj,  # Paginated related articles
         'paginator': paginator,  # Pass the paginator for navigation
     })
+
 
 
 
