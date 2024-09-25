@@ -11,25 +11,25 @@ openai_api_key = os.getenv("OPENAI_KEY")
 
 client = OpenAI(api_key=openai_api_key)
 
-
+print(openai_api_key)
 # Get query text based on id
 query_id = 1
 query = fetch_query(query_id=query_id)
 
 
-## Generate summary for each article
-#data = fetch_articles(query_id = query_id)
-#
-#for article in data:
-#    article_id = article[0]
-#    title = article[1]
-#    text = article[2]
-#
-#    summary = generate_summary(client, query, title, text)
-#
-#    print(article_id)
-#    print(summary)
-#
+# Generate summary for each article
+data = fetch_articles(query_id = query_id)
+
+for article in data:
+   article_id = article[0]
+   title = article[1]
+   text = article[2]
+
+   summary = generate_summary(client, query, title, text)
+
+   print(article_id)
+   print(summary)
+
 #    store_summary(summary, article_id)
 
 

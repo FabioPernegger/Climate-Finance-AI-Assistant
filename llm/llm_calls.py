@@ -21,6 +21,27 @@ def generate_summary(client, query, title, text, max_tokens = 200, temperature =
 
     return response.choices[0].message.content
 
+# cuts out an important passage fomr an article, relevant to a query based on the input of an article (broken down into title and text)
+def generate_passage(client, query, title, text, max_tokens = 200, temperature = 0, top_p = 0):
+
+    system_prompt = '''Extract a relevant passage of about 50-100 words based on this article. The article consists 
+    of a TITLE and a TEXT. The passage should contain the main information, with regard to the given QUERY but 
+    without answering it directly. Do not use introductory phrases (i.e., the article discusses) but directly start.'''
+    user_prompt = f'QUERY: {query}, TITLE: {title}, TEXT: {text}'
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        temperature=temperature,
+        max_tokens=max_tokens,
+        top_p=top_p
+    )
+
+    return response.choices[0].message.content
+
 #generates a summary based on multiple articles in order to answer a query
 def generate_summary_over_articles(client, query, articles, max_tokens = 200, temperature = 0, top_p = 0.5):
 
@@ -91,6 +112,60 @@ def generate_forecast(client, query, text, max_tokens = 200, temperature = 0, to
         temperature=temperature,
         max_tokens=max_tokens,
         top_p=top_p
+    )
+
+    return response.choices[0].message.content
+
+
+# generate an updated report
+def generate_passage(client, query, report, articles, max_tokens = 200, temperature = 0, top_p = 0):
+
+    system_prompt = '''Take an input of a query, a Report and articles. Create an updated 
+    report (based on the query) in html format, correcting and completing any information it is missing 
+    based on the articles. Return this updated report as the "updated_summary" in 
+    the output json. Afterwards gather all the changes done on the report and create 
+    a list, in html format, containing all the changes done to update the report. 
+    Return this list in "updates" in the output json. Lastly create a ranking of 
+    articles based on their importance in terms of creating an updated report. Return 
+    this ranking by returning the article id's in order of most important to least 
+    important in the "article_relevance" array, with the most important article id 
+    being in article_relevance[0].'''
+    user_prompt = f'QUERY: {query}, REPORT: {report}, articles: {articles}'
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        temperature=temperature,
+        max_tokens=max_tokens,
+        top_p=top_p,
+        response_format={ 
+            "type": "json_schema",
+            "strict": True, 
+            "json_schema":{
+                "name": "Updated_Report",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                    "updated_summary": {
+                        "type": "string"
+                    },
+                    "updates": {
+                        "type": "string"
+                    },
+                    "article_relevance": {
+                        "type": "array",
+                        "items": {
+                        "type": "string"
+                        }
+                    }
+                    },
+                    "required": []
+                }
+            }
+        }
     )
 
     return response.choices[0].message.content
