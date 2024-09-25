@@ -3,6 +3,7 @@ from django.db import models
 class Query(models.Model):
     text = models.TextField()
     search_query = models.TextField()
+    article_summary = models.TextField()
 
     def __str__(self):
         return self.text

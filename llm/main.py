@@ -25,10 +25,13 @@ for article in data:
    title = article[1]
    text = article[2]
 
-   summary = generate_summary(client, query, title, text)
+   #summary = generate_summary(client, query, title, text)
 
-   print(article_id)
-   print(summary)
+   #print(article_id)
+   #print(summary)
+
+summary = generate_summary_over_articles(client, query, data)
+print(summary)
 
 #    store_summary(summary, article_id)
 

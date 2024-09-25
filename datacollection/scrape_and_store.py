@@ -24,9 +24,11 @@ db_path = '../frontend/db.sqlite3'
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 
+
+
 # add query to db
 cursor.execute('''
-                    INSERT INTO cfaa_query (text, search_query)
+                    INSERT INTO cfaa_query (text, search_query, 'null')
                     VALUES (?, ?)
                     ''', (query_text, search_query))
 conn.commit()

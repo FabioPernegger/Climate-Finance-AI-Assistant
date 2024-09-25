@@ -31,6 +31,8 @@ def generate_summary_over_articles(client, query, articles, max_tokens = 200, te
 
     user_prompt = f'QUERY: {query}'
     for i, article in enumerate(articles):
+        if i > 5:
+            break
         user_prompt += f', ARTICLE {i+1}: {article}'
 
     response = client.chat.completions.create(
