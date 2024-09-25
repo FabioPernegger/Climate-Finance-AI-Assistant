@@ -9,8 +9,8 @@
 <div class="container my-5 fixed-layout">
     <!-- Question Section (Fixed) -->
     <div class="question-section mb-4">
-        <h5 class="question-text" data-query-id="{{ query_id }}" data-query="{{ query }}">
-            {{ query }}
+        <h5 class="question-text" data-query-id="{{ query_id }}" data-query="{{ query.text }}">
+            {{ query.text }}
         </h5>
     </div>
 
@@ -19,10 +19,11 @@
         <!-- Articles Section (Scrollable) -->
         <div class="col-lg-9 scrollable-articles">
             <div class="row">
-                {% for month, articles in articles_by_month.items %}
+                {% if articles %}
                     {% for article in articles %}
                     <div class="col-md-6 mb-4">
-                        <div class="card article-tile">
+                        <!-- Make the whole card clickable -->
+                        <div class="card article-tile" style="cursor: pointer;" data-article-id="{{ article.id }}" data-article-text="{{ article.text }}" data-article-title="{{ article.title }}" data-article-url="{{ article.url }}">
                             <div class="card-body">
                                 <h5 class="card-title">{{ article.title }}</h5>
                                 <p class="card-text">{{ article.text|truncatewords:50 }}</p>
@@ -30,7 +31,9 @@
                         </div>
                     </div>
                     {% endfor %}
-                {% endfor %}
+                {% else %}
+                    <p>No articles found for this query.</p>
+                {% endif %}
             </div>
         </div>
 
@@ -49,53 +52,62 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Summary</h5>
-                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quam velit, vulputate eu pharetra nec, mattis ac neque. Duis vulputate commodo lectus.</p>
+                    <!-- Display the generated summary from the query -->
+                    <p class="card-text">
+                        {% if query.article_summary %}
+                            {{ query.article_summary }}
+                        {% else %}
+                            No summary available for this query yet.
+                        {% endif %}
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal for showing full article content -->
+<div class="modal fade" id="articleModal" tabindex="-1" aria-labelledby="articleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="articleModalLabel">Article Title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="article-full-text">Full article text will go here.</p>
+        <a href="#" id="article-original-link" class="btn btn-primary" target="_blank">Read Full Article</a>
+      </div>
+      <div class="modal-footer">
+        <!-- Close button at the bottom of the modal -->
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Add JavaScript at the bottom -->
 <script>
-// Function to handle the Monitor Question button click
-document.querySelector('.btn-monitor').addEventListener('click', function() {
-    // Extract the question text from the h5 element
-    const questionElement = document.querySelector('.question-text');
-    const queryText = questionElement.getAttribute('data-query');
-    const queryId = questionElement.getAttribute('data-query-id');
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click event listener for all article tiles
+    const articleTiles = document.querySelectorAll('.article-tile');
 
-    // Data to send (the extracted question)
-    const data = {
-        query: queryText,  // Send the question text as part of the AJAX request
-        query_id: queryId,
-    };
+    articleTiles.forEach(tile => {
+        tile.addEventListener('click', function() {
+            // Get the article details from the data attributes
+            const articleTitle = this.getAttribute('data-article-title');
+            const articleText = this.getAttribute('data-article-text');
+            const articleUrl = this.getAttribute('data-article-url');
 
-    // Send an AJAX POST request to the Django view
-    fetch('/monitor-question/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCSRFToken()  // Use Django's CSRF token for security
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            console.log('Success:', data.message);
-            // Disable the button and change its appearance and text
-            const monitorButton = document.querySelector('.btn-monitor');
-            monitorButton.disabled = true;  // Disable the button
-            monitorButton.classList.remove('btn-warning');  // Remove the warning class
-            monitorButton.classList.add('btn-secondary');  // Add the disabled style
-            monitorButton.textContent = 'Already Monitoring';  // Update the button text
-        } else {
-            console.error('Error:', data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
+            // Update the modal content with article details
+            document.getElementById('articleModalLabel').textContent = articleTitle;
+            document.getElementById('article-full-text').textContent = articleText;
+            document.getElementById('article-original-link').setAttribute('href', articleUrl);
+
+            // Trigger the modal
+            const modal = new bootstrap.Modal(document.getElementById('articleModal'));
+            modal.show();
+        });
     });
 });
 

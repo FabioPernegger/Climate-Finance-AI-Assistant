@@ -1,5 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 
+import os
+import environ
+from openai import OpenAI
 from .models import Article, Report, ReportArticle
 from .models import Query
 from .models import Topic
@@ -9,6 +12,8 @@ from django.views.decorators.csrf import csrf_exempt
 from datetime import date
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_http_methods
+from .scraper import scrape_and_store_news
+from .llm_calls import generate_summary_over_articles
 
 
 
@@ -57,32 +62,73 @@ def delete_topic(request, topic_id):
     # Return a success response
     return JsonResponse({'message': 'Topic deleted successfully'}, status=200)
 
-def discovery_page(request): #, queryid=1):
-    # Get the Query object or return 404 if not found
-    query = get_object_or_404(Query, id=1)
-    query_id = query.id
+def discovery_page(request):
+    # Define the OpenAI client inside the view
+    env = environ.Env()
+    environ.Env.read_env()
 
-    is_monitored = Report.objects.filter(query_id=query_id).exists()
+    # Get OpenAI API Key
+    OPENAI_API_KEY = env('OPENAI_API_KEY')
+    client = OpenAI(api_key=OPENAI_API_KEY)  # Instantiate the OpenAI client
 
-    # Get the current year
-    current_year = datetime.now().year
+    if request.method == 'GET':
+        query_text = request.GET.get('query', '')  # Get the query from the search bar
 
-    # Prepare a dictionary to hold articles for each month
-    articles_by_month = {}
+        if query_text:
+            # Check if the query already exists in the database
+            existing_query = Query.objects.filter(text=query_text).first()
 
-    # Loop through each month
-    for month in range(1, 13):
-        # Filter articles for the specific query and month
-        articles = Article.objects.filter(query=query, publish_date__year=current_year, publish_date__month=month)[
-                   :6]
-        articles_by_month[month] = articles
+            if existing_query:
+                query = existing_query
+                # Fetch the articles associated with the query
+                articles = Article.objects.filter(query=query)
+            else:
+                # If the query doesn't exist, call the scraper function
+                search_query = query_text  # You can refine the query if necessary
+                result = scrape_and_store_news(query_text=query_text, search_query=search_query)
 
-    return render(request, 'cfaa/discovery.html', {
-        'query': query,
-        'query_id': query_id,
-        'is_monitored': is_monitored,
-        'articles_by_month': articles_by_month,
-    })
+                # Retrieve the newly created query
+                query = get_object_or_404(Query, text=query_text)
+                # Fetch the newly scraped articles
+                articles = Article.objects.filter(query=query)
+
+            # Prepare the articles as an array of strings (article text only)
+            article_texts = [article.text for article in articles]
+
+            # Check if the summary is 'null' or empty after either scenario
+            if query.article_summary == 'null' or not query.article_summary:
+                # Generate a summary over the articles if the summary is 'null'
+                summary = generate_summary_over_articles(
+                    client,
+                    query.text,  # Pass query as a string (query.text)
+                    article_texts,  # Pass articles as an array of strings (article texts)
+                    max_tokens=200,
+                    temperature=0,
+                    top_p=0.5
+                )
+
+                # Update the query with the generated summary
+                query.article_summary = summary
+                query.save()  # Save the updated query with the new summary
+
+            # Check if the query is being monitored (using the Report model)
+            is_monitored = Report.objects.filter(query=query).exists()
+
+        else:
+            # If no query is entered, load a default query or handle this case
+            query = get_object_or_404(Query, id=1)  # Replace with any default query logic
+            articles = Article.objects.filter(query=query).order_by('-publish_date')[:10]
+            is_monitored = Report.objects.filter(query=query).exists()
+
+        # Prepare the context for the template
+        context = {
+            'query': query,
+            'query_id': query.id,  # Pass the query ID
+            'articles': articles,
+            'is_monitored': is_monitored  # Pass the monitoring flag
+        }
+
+        return render(request, 'cfaa/discovery.html', context)
 
 
 def report_page(request, report_id):
