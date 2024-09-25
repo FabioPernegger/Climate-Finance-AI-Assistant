@@ -21,27 +21,6 @@ def generate_summary(client, query, title, text, max_tokens = 200, temperature =
 
     return response.choices[0].message.content
 
-# cuts out an important passage fomr an article, relevant to a query based on the input of an article (broken down into title and text)
-def generate_passage(client, query, title, text, max_tokens = 200, temperature = 0, top_p = 0):
-
-    system_prompt = '''Extract a relevant passage of about 50-100 words based on this article. The article consists 
-    of a TITLE and a TEXT. The passage should contain the main information, with regard to the given QUERY but 
-    without answering it directly. Do not use introductory phrases (i.e., the article discusses) but directly start.'''
-    user_prompt = f'QUERY: {query}, TITLE: {title}, TEXT: {text}'
-
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ],
-        temperature=temperature,
-        max_tokens=max_tokens,
-        top_p=top_p
-    )
-
-    return response.choices[0].message.content
-
 #generates a summary based on multiple articles in order to answer a query
 def generate_summary_over_articles(client, query, articles, max_tokens = 200, temperature = 0, top_p = 0.5):
 
@@ -118,7 +97,7 @@ def generate_forecast(client, query, text, max_tokens = 200, temperature = 0, to
 
 
 # generate an updated report
-def generate_passage(client, query, report, articles, max_tokens = 200, temperature = 0, top_p = 0):
+def generate_updated_report(client, query, report, articles, max_tokens = 200, temperature = 0, top_p = 0):
 
     system_prompt = '''Take an input of a query, a Report and articles. Create an updated 
     report (based on the query) in html format, correcting and completing any information it is missing 
@@ -166,6 +145,27 @@ def generate_passage(client, query, report, articles, max_tokens = 200, temperat
                 }
             }
         }
+    )
+
+    return response.choices[0].message.content
+
+# cuts out an important passage fomr an article, relevant to a query based on the input of an article (broken down into title and text)
+def generate_passage(client, query, title, text, maxg_tokens = 200, temperature = 0, top_p = 0):
+
+    system_prompt = '''Extract a relevant passage of about 50-100 words based on this article. The article consists 
+    of a TITLE and a TEXT. The passage should contain the main information, with regard to the given QUERY but 
+    without answering it directly. Do not use introductory phrases (i.e., the article discusses) but directly start.'''
+    user_prompt = f'QUERY: {query}, TITLE: {title}, TEXT: {text}'
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        temperature=temperature,
+        max_tokens=max_tokens,
+        top_p=top_p
     )
 
     return response.choices[0].message.content
