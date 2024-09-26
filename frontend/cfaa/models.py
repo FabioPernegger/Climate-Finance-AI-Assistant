@@ -31,7 +31,7 @@ class Report(models.Model):
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='reports')
     creation_day = models.DateField()
     text = models.TextField()
-    basis = models.TextField()
+    basis = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='derived_reports')
     update = models.TextField()
 
     def __str__(self):

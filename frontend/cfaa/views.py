@@ -15,6 +15,7 @@ from django.views.decorators.http import require_http_methods
 from .scraper import scrape_and_store_news
 from .llm_calls import generate_summary_over_articles, generate_updated_report
 import json
+from .report_generator import create_report
 
 
 
@@ -183,69 +184,36 @@ def report_page(request, report_id):
 def monitor_question(request):
     env = environ.Env()
     environ.Env.read_env()
-
-    # Get OpenAI API Key
     OPENAI_API_KEY = env('OPENAI_API_KEY')
     client = OpenAI(api_key=OPENAI_API_KEY)  # Instantiate the OpenAI client
 
     if request.method == 'POST':
-        # Get the JSON data from the request body
-        body = json.loads(request.body)
-        query_text = body.get('query')  # Extract the query text
-        query_id = body.get('query_id')
+        try:
+            # Get the JSON data from the request body
+            body = json.loads(request.body)
+            query_text = body.get('query')  # Extract the query text
+            query_id = body.get('query_id')
 
-        # Fetch the query object
-        query = Query.objects.get(id=query_id)
+            # Fetch the query object
+            query = Query.objects.get(id=query_id)
 
-        # Create a new Topic object
-        new_topic = Topic.objects.create(title=query_text)
+            # Create a new Topic object
+            new_topic = Topic.objects.create(title=query_text)
 
-        # Retrieve articles related to the query, including title and text
-        articles = Article.objects.filter(query=query).values('id', 'title', 'text')
+            # Retrieve articles related to the query, including title and text
+            articles = Article.objects.filter(query=query).values('id', 'title', 'text')
 
-        # Generate a new report using the LLM call (no previous report, so pass None)
-        updated_report_data = generate_updated_report(
-            client,  # Pass the OpenAI client instance
-            query.text,  # Pass the query text
-            None,  # No previous report
-            articles,  # Pass the articles (with title and text)
-            max_tokens=1000,  # Increase max_tokens to 1000 for larger responses
-            temperature=0,
-            top_p=0
-        )
-
-        # Save the newly generated report and updates
-        if updated_report_data["updated_summary"]:
-            # Create the report in the database
-            new_report = Report.objects.create(
-                creation_day=date.today(),
-                text=updated_report_data["updated_summary"],  # Use the generated report text
-                basis="Initial basis",  # You can modify this as needed
-                update=updated_report_data.get("updates", ""),  # Use the generated update text
-                query=query,
-                topic=new_topic
-            )
-
-            # Store each article in the ReportArticle model, with the current report
-            for article_data in articles:
-                article_id = article_data['id']
-                article_instance = Article.objects.get(id=article_id)  # Get the actual Article instance
-
-                # Create a ReportArticle instance for each article
-                ReportArticle.objects.create(
-                    report=new_report,
-                    article=article_instance
-                )
+            # Call the create_report function, without passing any previous report
+            new_report = create_report(client, query, new_topic, articles, previous_report=None)
 
             # Return a success message as JSON
             return JsonResponse({
-                'message': 'New topic created successfully!',
+                'message': 'New topic and report created successfully!',
                 'topic_id': new_topic.id,
                 'report_id': new_report.id
             })
-
-        # If report generation failed
-        return JsonResponse({'error': 'Failed to generate report'}, status=500)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
 
     # Return error if not POST request
     return JsonResponse({'error': 'Invalid request method'}, status=400)
