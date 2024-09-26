@@ -3,7 +3,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from llm_calls import generate_summary, generate_summary_over_articles
+from llm_calls import generate_summary, generate_summary_over_articles, generate_updated_report_new
 from data_funcs import fetch_articles, store_summary, fetch_query
 
 load_dotenv()
@@ -20,18 +20,27 @@ query = fetch_query(query_id=query_id)
 # Generate summary for each article
 data = fetch_articles(query_id = query_id)
 
-for article in data:
-   article_id = article[0]
-   title = article[1]
-   text = article[2]
+articles = list()
+for article_t in data:
+   article = dict()
+   article['id']= article_t[0]
+   article['title'] = article_t[1]
+   article['text'] = article_t[2]
+   articles.append(article)
+   if len(articles) > 5:
+      break
+
 
    #summary = generate_summary(client, query, title, text)
 
    #print(article_id)
    #print(summary)
 
-summary = generate_summary_over_articles(client, query, data)
-print(summary)
+# summary = generate_summary_over_articles(client, query, data)
+# print(summary)
+
+output = generate_updated_report_new(client, query, '', articles)
+print(output)
 
 #    store_summary(summary, article_id)
 

@@ -1,4 +1,8 @@
 # generates a summary, relevant to a query based on the input of an article (broken down into title and text)
+from openai import OpenAI
+from pydantic import BaseModel
+from typing import List
+
 def generate_summary(client, query, title, text, max_tokens = 200, temperature = 0, top_p = 0):
 
     system_prompt = '''Summarize the article you are provided with in 2-3 very short sentences. The article consists 
@@ -152,65 +156,51 @@ def generate_updated_report(client, query, report, articles, max_tokens = 200, t
     return response.choices[0].message.content
 
 
-def generate_updated_report_new(client, query, previous_report, articles, max_tokens=200, temperature=0, top_p=0):
+class UpdatedReport(BaseModel):
+    updated_summary: str
+    updates: str
+
+def generate_updated_report_new(client: OpenAI, query: str, previous_report: str, articles: List[dict], max_tokens=1000, temperature=0, top_p=0):
+    """
+    Generates an updated report based on a query, articles, and optionally a previous report.
+    If no previous report is provided, generates a new report based solely on the articles.
+    """
 
     # Prepare the system prompt depending on whether there is a previous report
     if previous_report:
         system_prompt = '''Take an input of a query, a previous report, and a list of articles. 
         Create an updated report based on the query, correcting and completing any missing information 
-        based on the articles. Return this updated report as the "updated_summary" in the output JSON.
-        Then, gather all the changes done to the report and create a list (in HTML format) containing 
-        the changes made to update the report. Return this list in "updates" in the output JSON.
-        Lastly, rank the articles based on their importance in updating the report. Return the article IDs 
-        in order of relevance, with the most important being in "article_relevance".'''
+        based on the articles. Return this updated report as the "updated_summary".
+        Then, gather all the changes done to the report and create a list containing 
+        the changes made to update the report. Return this list in "updates".'''
     else:
         system_prompt = '''Take an input of a query and a list of articles. Create a new report based on 
-        the query using the articles. Return this report as the "updated_summary" in the output JSON.
-        Lastly, rank the articles based on their importance in generating the report. Return the article 
-        IDs in order of relevance in "article_relevance".'''
+        the query using the articles. Return this report as the "updated_summary".'''
 
     # Prepare the user prompt
-    articles_text = "\n".join([f"Article {article['id']}: {article['text']}" for article in articles])
+    articles_text = "\n".join([f"Article {article['id']}: {article['text'][:1000]}" for article in articles])
     user_prompt = f'QUERY: {query}\nPREVIOUS REPORT: {previous_report or "None"}\nARTICLES: {articles_text}'
 
     try:
         # Make the API call to generate the updated report and changes
-        response = client.chat.completions.create(
+        completion = client.beta.chat.completions.parse(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
+            response_format=UpdatedReport,  # Use Pydantic model for structured output
             temperature=temperature,
             max_tokens=max_tokens,
             top_p=top_p,
-            response_format="json",
-            json_schema={
-                "type": "object",
-                "properties": {
-                    "updated_summary": {"type": "string"},
-                    "updates": {"type": "string"},
-                    "article_relevance": {
-                        "type": "array",
-                        "items": {"type": "string"}
-                    }
-                },
-                "required": ["updated_summary", "article_relevance"]
-            }
         )
 
-        # Extract the structured response content
-        result = response.choices[0].message.content
-
-        # Ensure the result has the necessary fields
-        report_data = result.get("updated_summary", "")
-        updates = result.get("updates", "")
-        article_relevance = result.get("article_relevance", [])
+        # Extract the structured response
+        structured_response = completion.choices[0].message.parsed
 
         return {
-            "updated_summary": report_data,
-            "updates": updates,
-            "article_relevance": article_relevance
+            "updated_summary": structured_response.updated_summary,
+            "updates": structured_response.updates,
         }
 
     except Exception as e:

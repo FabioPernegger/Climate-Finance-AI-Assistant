@@ -1,9 +1,10 @@
-from .models import Article
+from .models import Article, Query
 
 
-def fetch_articles(year=None, month=None, query_id=None):
+def fetch_articles(year=None, month=None, query_id=None, limit=10):
     """
     Fetches articles based on year, month, and query_id using Django ORM.
+    Optionally limits the number of articles retrieved.
     """
     articles = Article.objects.all()  # Start with all articles
 
@@ -19,11 +20,13 @@ def fetch_articles(year=None, month=None, query_id=None):
     if query_id:
         articles = articles.filter(query_id=query_id)
 
+    # Limit the number of articles retrieved
+    articles = articles[:5]
+
     # Return a list of dictionaries containing article id, title, and text
     return articles.values('id', 'title', 'text')
 
 
-from .models import Query
 
 def fetch_query(query_id):
     """

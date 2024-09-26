@@ -13,7 +13,8 @@ from datetime import date
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_http_methods
 from .scraper import scrape_and_store_news
-from .llm_calls import generate_summary_over_articles
+from .llm_calls import generate_summary_over_articles, generate_updated_report
+import json
 
 
 
@@ -152,6 +153,7 @@ def report_page(request, report_id):
     page_number = request.GET.get('page', 1)  # Get the page number from the request
     page_obj = paginator.get_page(page_number)  # Get the articles for the current page
 
+    # If the report is edited and saved via the form (POST request)
     if request.method == 'POST':
         # Get the submitted text from the TinyMCE editor
         report_text = request.POST.get('report_text')
@@ -160,8 +162,10 @@ def report_page(request, report_id):
         report.text = report_text
         report.save()  # Save the updated report
 
-        return redirect('report', report_id=report.id)  # Redirect to the same page to see the updated report
+        # Redirect to the same page to reload the updated content
+        return redirect('report', report_id=report.id)
 
+    # Render the report page with all the relevant data
     return render(request, 'cfaa/report.html', {
         'query': query.text,  # Pass the query text to the template
         'report': report,  # Pass the current report object
@@ -174,27 +178,76 @@ def report_page(request, report_id):
 
 
 
+
 @csrf_exempt  # Since this is an AJAX request, we'll disable CSRF for this view (if not using CSRF tokens)
 def monitor_question(request):
+    env = environ.Env()
+    environ.Env.read_env()
+
+    # Get OpenAI API Key
+    OPENAI_API_KEY = env('OPENAI_API_KEY')
+    client = OpenAI(api_key=OPENAI_API_KEY)  # Instantiate the OpenAI client
+
     if request.method == 'POST':
         # Get the JSON data from the request body
-        import json
         body = json.loads(request.body)
-        query = body.get('query')  # Extract the question
+        query_text = body.get('query')  # Extract the query text
         query_id = body.get('query_id')
 
-        # Create a new Topic object (you can adjust this logic as needed)
-        new_topic = Topic.objects.create(title=query)
-        new_report = Report.objects.create(creation_day=date.today(),
-                                           text="Lorem Ipsum",
-                                           basis=-1,
-                                           update="",
-                                           query_id=query_id,
-                                           topic_id=new_topic.id)
+        # Fetch the query object
+        query = Query.objects.get(id=query_id)
 
-        # Return a success message as JSON
-        return JsonResponse({'message': 'New topic created successfully!', 'topic_id': new_topic.id, 'report_id': new_report.id})
+        # Create a new Topic object
+        new_topic = Topic.objects.create(title=query_text)
 
+        # Retrieve articles related to the query, including title and text
+        articles = Article.objects.filter(query=query).values('id', 'title', 'text')
+
+        # Generate a new report using the LLM call (no previous report, so pass None)
+        updated_report_data = generate_updated_report(
+            client,  # Pass the OpenAI client instance
+            query.text,  # Pass the query text
+            None,  # No previous report
+            articles,  # Pass the articles (with title and text)
+            max_tokens=1000,  # Increase max_tokens to 1000 for larger responses
+            temperature=0,
+            top_p=0
+        )
+
+        # Save the newly generated report and updates
+        if updated_report_data["updated_summary"]:
+            # Create the report in the database
+            new_report = Report.objects.create(
+                creation_day=date.today(),
+                text=updated_report_data["updated_summary"],  # Use the generated report text
+                basis="Initial basis",  # You can modify this as needed
+                update=updated_report_data.get("updates", ""),  # Use the generated update text
+                query=query,
+                topic=new_topic
+            )
+
+            # Store each article in the ReportArticle model, with the current report
+            for article_data in articles:
+                article_id = article_data['id']
+                article_instance = Article.objects.get(id=article_id)  # Get the actual Article instance
+
+                # Create a ReportArticle instance for each article
+                ReportArticle.objects.create(
+                    report=new_report,
+                    article=article_instance
+                )
+
+            # Return a success message as JSON
+            return JsonResponse({
+                'message': 'New topic created successfully!',
+                'topic_id': new_topic.id,
+                'report_id': new_report.id
+            })
+
+        # If report generation failed
+        return JsonResponse({'error': 'Failed to generate report'}, status=500)
+
+    # Return error if not POST request
     return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 

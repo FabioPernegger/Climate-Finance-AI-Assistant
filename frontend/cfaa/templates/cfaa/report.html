@@ -31,7 +31,8 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">Update</h5>
-                    <p class="card-text">{{ report.update }}</p>
+                    <!-- Show the updated information here -->
+                    <p class="card-text">{{ report.update|safe }}</p> <!-- Ensure that HTML is rendered -->
                 </div>
             </div>
 
@@ -42,7 +43,7 @@
                     <div class="card-body">
                         <h5 class="card-title">State of Knowledge</h5>
                         <!-- TinyMCE Editor for the report.text field -->
-                        <textarea id="report_text_editor" name="report_text">{{ report.text }}</textarea>
+                        <textarea id="report_text_editor" name="report_text">{{ report.text|safe }}</textarea> <!-- Safe filter ensures HTML is rendered -->
                         <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
                     </div>
                 </div>
@@ -53,15 +54,19 @@
         <div class="col-lg-4">
             <div class="card mb-4">
                 <div class="card-body">
-                    <h5 class="card-title">Related Articles</h5>
+                    <h5 class="card-title">Relevant Articles</h5> <!-- Adjusted title to show relevance -->
                     <div class="related-articles">
-                        {% for article in page_obj %}
-                        <div class="article-box mb-3">
-                            <h6>{{ article.title }}</h6>
-                            <p>{{ article.text|truncatewords:25 }}</p>
-                            <a href="{{ article.url }}" target="_blank" class="btn btn-primary">Read more</a>
-                        </div>
-                        {% endfor %}
+                        {% if page_obj %}
+                            {% for article in page_obj %}
+                            <div class="article-box mb-3">
+                                <h6>{{ article.title }}</h6>
+                                <p>{{ article.text|truncatewords:25 }}</p>
+                                <a href="{{ article.url }}" target="_blank" class="btn btn-primary">Read more</a>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p>No related articles found.</p>
+                        {% endif %}
                     </div>
 
                     <!-- Pagination Controls -->

@@ -48,7 +48,6 @@ class Summary(models.Model):
 class ReportArticle(models.Model):
     report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name='report_articles')
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='report_articles')
-    summary = models.ForeignKey(Summary, on_delete=models.CASCADE, related_name='report_articles')
 
     def __str__(self):
         return f"ReportArticle for {self.report} and {self.article}"

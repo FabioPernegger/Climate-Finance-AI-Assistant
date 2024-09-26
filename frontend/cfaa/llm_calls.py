@@ -1,4 +1,8 @@
 # generates a summary, relevant to a query based on the input of an article (broken down into title and text)
+from openai import OpenAI
+from pydantic import BaseModel
+from typing import List
+
 def generate_summary(client, query, title, text, max_tokens=200, temperature=0, top_p=0):
     system_prompt = '''Summarize the article you are provided with in 2-3 very short sentences. The article consists 
     of a TITLE and a TEXT. The summary should contain the main information, also with regard to the given QUERY but 
@@ -97,60 +101,64 @@ def generate_forecast(client, query, text, max_tokens=200, temperature=0, top_p=
 
 
 # generate an updated report
-def generate_updated_report(client, query, report, articles, max_tokens=200, temperature=0, top_p=0):
-    system_prompt = '''Take an input of a query, a Report and articles. Create an updated 
-    report (based on the query) in html format, correcting and completing any information it is missing 
-    based on the articles. Return this updated report as the "updated_summary" in 
-    the output json. Afterwards gather all the changes done on the report and create 
-    a list, in html format, containing all the changes done to update the report. 
-    Return this list in "updates" in the output json. Lastly create a ranking of 
-    articles based on their importance in terms of creating an updated report. Return 
-    this ranking by returning the article id's in order of most important to least 
-    important in the "article_relevance" array, with the most important article id 
-    being in article_relevance[0].'''
-    user_prompt = f'QUERY: {query}, REPORT: {report}, articles: {articles}'
+class UpdatedReport(BaseModel):
+    updated_summary: str
+    updates: str
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
-        ],
-        temperature=temperature,
-        max_tokens=max_tokens,
-        top_p=top_p,
-        response_format={
-            "type": "json_schema",
-            "strict": True,
-            "json_schema": {
-                "name": "Updated_Report",
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "updated_summary": {
-                            "type": "string"
-                        },
-                        "updates": {
-                            "type": "string"
-                        },
-                        "article_relevance": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "required": []
-                }
-            }
+def generate_updated_report(client: OpenAI, query: str, previous_report: str, articles: List[dict], max_tokens=1000, temperature=0, top_p=0):
+    """
+    Generates an updated report based on a query, articles (with title and text), and optionally a previous report.
+    If no previous report is provided, generates a new report based solely on the articles.
+    """
+
+    # Prepare the system prompt depending on whether there is a previous report
+    if previous_report:
+        system_prompt = '''Take an input of a query, a previous report, and a list of articles. 
+        Create an updated report based on the query, correcting and completing any missing information 
+        based on the articles. Return this updated report as the "updated_summary".
+        Then, gather all the changes done to the report and create a list containing 
+        the changes made to update the report. Return this list in "updates".'''
+    else:
+        system_prompt = '''Take an input of a query and a list of articles. Create a new report based on 
+        the query using the articles. Return this report as the "updated_summary".'''
+
+    # Prepare the user prompt, including both article titles and truncated text
+    articles_text = "\n".join([f"Article {article['id']}: {article['title']}: {article['text'][:500]}" for article in articles])
+    user_prompt = f'QUERY: {query}\nPREVIOUS REPORT: {previous_report or "None"}\nARTICLES: {articles_text}'
+
+    try:
+        # Make the API call to generate the updated report and changes
+        completion = client.beta.chat.completions.parse(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            response_format=UpdatedReport,  # Use Pydantic model for structured output
+            temperature=temperature,
+            max_tokens=max_tokens,
+            top_p=top_p,
+        )
+
+        # Extract the structured response
+        structured_response = completion.choices[0].message.parsed
+
+        return {
+            "updated_summary": structured_response.updated_summary,
+            "updates": structured_response.updates,
         }
-    )
 
-    return response.choices[0].message.content
+    except Exception as e:
+        print(f"Error generating report: {e}")
+        return {
+            "updated_summary": None,
+            "updates": None,
+        }
+
 
 
 # cuts out an important passage fomr an article, relevant to a query based on the input of an article (broken down into title and text)
-def generate_passage(client, query, title, text, maxg_tokens=200, temperature=0, top_p=0):
+def generate_passage(client, query, title, text, max_tokens=200, temperature=0, top_p=0):
     system_prompt = '''Extract a relevant passage of about 50-100 words based on this article. The article consists 
     of a TITLE and a TEXT. The passage should contain the main information, with regard to the given QUERY but 
     without answering it directly. Do not use introductory phrases (i.e., the article discusses) but directly start.'''

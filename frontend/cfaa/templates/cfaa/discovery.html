@@ -89,43 +89,66 @@
 <!-- Add JavaScript at the bottom -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Add click event listener for all article tiles
-    const articleTiles = document.querySelectorAll('.article-tile');
+    // Add event listener for the "Monitor Question" button
+    const monitorButton = document.querySelector('.btn-monitor');
 
-    articleTiles.forEach(tile => {
-        tile.addEventListener('click', function() {
-            // Get the article details from the data attributes
-            const articleTitle = this.getAttribute('data-article-title');
-            const articleText = this.getAttribute('data-article-text');
-            const articleUrl = this.getAttribute('data-article-url');
+    if (monitorButton) {
+        monitorButton.addEventListener('click', function() {
+            // Extract the question text and query id
+            const questionElement = document.querySelector('.question-text');
+            const queryText = questionElement.getAttribute('data-query');
+            const queryId = questionElement.getAttribute('data-query-id');
 
-            // Update the modal content with article details
-            document.getElementById('articleModalLabel').textContent = articleTitle;
-            document.getElementById('article-full-text').textContent = articleText;
-            document.getElementById('article-original-link').setAttribute('href', articleUrl);
+            // Data to send (the extracted question)
+            const data = {
+                query: queryText,  // Send the question text as part of the AJAX request
+                query_id: queryId,
+            };
 
-            // Trigger the modal
-            const modal = new bootstrap.Modal(document.getElementById('articleModal'));
-            modal.show();
+            // Send an AJAX POST request to the Django view
+            fetch('/monitor-question/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()  // Use Django's CSRF token for security
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    console.log('Success:', data.message);
+                    // Disable the button and change its appearance and text
+                    monitorButton.disabled = true;  // Disable the button
+                    monitorButton.classList.remove('btn-warning');  // Remove the warning class
+                    monitorButton.classList.add('btn-secondary');  // Add the disabled style
+                    monitorButton.textContent = 'Already Monitoring';  // Update the button text
+                } else {
+                    console.error('Error:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         });
-    });
-});
+    }
 
-// Function to get CSRF token (Django requires CSRF tokens for POST requests)
-function getCSRFToken() {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, 10) === 'csrftoken=') {
-                cookieValue = decodeURIComponent(cookie.substring(10));
-                break;
+    // Function to get CSRF token (Django requires CSRF tokens for POST requests)
+    function getCSRFToken() {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, 10) === 'csrftoken=') {
+                    cookieValue = decodeURIComponent(cookie.substring(10));
+                    break;
+                }
             }
         }
+        return cookieValue;
     }
-    return cookieValue;
-}
+});
 </script>
 
 {% endblock %}
