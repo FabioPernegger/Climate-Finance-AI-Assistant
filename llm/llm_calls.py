@@ -151,6 +151,76 @@ def generate_updated_report(client, query, report, articles, max_tokens = 200, t
 
     return response.choices[0].message.content
 
+
+def generate_updated_report_new(client, query, previous_report, articles, max_tokens=200, temperature=0, top_p=0):
+
+    # Prepare the system prompt depending on whether there is a previous report
+    if previous_report:
+        system_prompt = '''Take an input of a query, a previous report, and a list of articles. 
+        Create an updated report based on the query, correcting and completing any missing information 
+        based on the articles. Return this updated report as the "updated_summary" in the output JSON.
+        Then, gather all the changes done to the report and create a list (in HTML format) containing 
+        the changes made to update the report. Return this list in "updates" in the output JSON.
+        Lastly, rank the articles based on their importance in updating the report. Return the article IDs 
+        in order of relevance, with the most important being in "article_relevance".'''
+    else:
+        system_prompt = '''Take an input of a query and a list of articles. Create a new report based on 
+        the query using the articles. Return this report as the "updated_summary" in the output JSON.
+        Lastly, rank the articles based on their importance in generating the report. Return the article 
+        IDs in order of relevance in "article_relevance".'''
+
+    # Prepare the user prompt
+    articles_text = "\n".join([f"Article {article['id']}: {article['text']}" for article in articles])
+    user_prompt = f'QUERY: {query}\nPREVIOUS REPORT: {previous_report or "None"}\nARTICLES: {articles_text}'
+
+    try:
+        # Make the API call to generate the updated report and changes
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=temperature,
+            max_tokens=max_tokens,
+            top_p=top_p,
+            response_format="json",
+            json_schema={
+                "type": "object",
+                "properties": {
+                    "updated_summary": {"type": "string"},
+                    "updates": {"type": "string"},
+                    "article_relevance": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                    }
+                },
+                "required": ["updated_summary", "article_relevance"]
+            }
+        )
+
+        # Extract the structured response content
+        result = response.choices[0].message.content
+
+        # Ensure the result has the necessary fields
+        report_data = result.get("updated_summary", "")
+        updates = result.get("updates", "")
+        article_relevance = result.get("article_relevance", [])
+
+        return {
+            "updated_summary": report_data,
+            "updates": updates,
+            "article_relevance": article_relevance
+        }
+
+    except Exception as e:
+        print(f"Error generating report: {e}")
+        return {
+            "updated_summary": None,
+            "updates": None,
+            "article_relevance": []
+        }
+
 # cuts out an important passage fomr an article, relevant to a query based on the input of an article (broken down into title and text)
 def generate_passage(client, query, title, text, maxg_tokens = 200, temperature = 0, top_p = 0):
 
