@@ -103,6 +103,12 @@
     color: white;
 }
 
+.small-text {
+    font-size: 0.85rem;  /* Adjust this size as needed */
+    line-height: 1.2;  /* Optional: reduce line height for compact text */
+    color: #333;  /* Optional: change color */
+}
+
 
 /*discovery*/
 
@@ -188,5 +194,16 @@
 .related-articles .article-box a {
     font-size: 0.9rem;
     color: #007bff;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #ffc107;  /* Bootstrap's warning yellow */
+    border-color: #ffc107;
+    color: #343a40;  /* White text */
+}
+
+/* Ensure other buttons remain yellow with dark text */
+.pagination .page-link {
+    color: #343a40;  /* Dark text */
 }
 

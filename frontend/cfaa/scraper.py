@@ -10,37 +10,37 @@ from .models import Query, Article as ArticleModel
 logger = logging.getLogger(__name__)
 
 
-def scrape_and_store_news(query_text, search_query):
+def scrape_and_store_news(query_text, search_query, start_date=datetime.today(), end_date=datetime.today()- timedelta(days=7)):
     """
-    This function retrieves news articles from the last 7 days for the given query and stores them in the Django database using Django's ORM.
+    This function retrieves news articles between the given start_date and end_date for the query
+    and stores them in the Django database using Django's ORM.
 
     Args:
         query_text (str): The query text entered by the user.
         search_query (str): The refined search query to be used in Google search.
+        start_date (datetime): The start date for collecting articles.
+        end_date (datetime): The end date for collecting articles.
 
     Returns:
         str: Success message or an error message.
     """
-    # Define number of Google results to retrieve
+    # Define the number of Google results to retrieve
     num_results = 10
 
     try:
         # Create and save the query in the database
-        query = Query.objects.create(text=query_text, search_query=search_query, article_summary='null')
-
-        # Get today's date and 7 days ago
-        today = datetime.now()
-        seven_days_ago = today - timedelta(days=7)
+        query, created = Query.objects.get_or_create(
+            text=query_text,
+            search_query=query_text,
+            defaults={'article_summary': 'null'}
+        )
 
         # Convert dates to the format 'YYYY-MM-DD'
-        today_str = today.strftime('%Y-%m-%d')
-        seven_days_ago_str = seven_days_ago.strftime('%Y-%m-%d')
+        start_date_str = start_date.strftime('%Y-%m-%d')
+        end_date_str = end_date.strftime('%Y-%m-%d')
 
-        # Construct the search query to include articles from the last 7 days
-        query_date_range = f'{search_query} after:{seven_days_ago_str} before:{today_str}'
-
-        # Initialize summary text to collect summaries of all articles
-        all_summaries = []
+        # Construct the search query to include articles from the specified date range
+        query_date_range = f'{query_text} after:{start_date_str} before:{end_date_str}'
 
         # Retrieve and store articles
         for url in search(query_date_range, num_results=num_results):
@@ -50,7 +50,7 @@ def scrape_and_store_news(query_text, search_query):
                 article.parse()
 
                 if not article.publish_date:
-                    article.publish_date = today  # Use today's date if no publish date is available
+                    article.publish_date = end_date  # Use the end_date if no publish date is available
 
                 # Skip articles without key fields
                 if not article.title or not article.text:
@@ -63,7 +63,7 @@ def scrape_and_store_news(query_text, search_query):
                     title=article.title,
                     text=article.text,
                     url=url,
-                    summary=''
+                    summary=''  # Placeholder for future summaries
                 )
 
             except ArticleException as e:

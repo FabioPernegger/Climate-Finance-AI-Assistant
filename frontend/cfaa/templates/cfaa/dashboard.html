@@ -17,8 +17,9 @@
         {% for topic in monitored_topics %}
         <div class="list-group-item d-flex justify-content-between align-items-center">
             <div class="topic-info">
-                <h5>{{ topic.title }}</h5>
-                <span>{{ topic.new_articles }} new articles</span>
+                <h1>{{ topic.title }}</h1>
+                <!-- Display the latest report update with small text styling -->
+                <div class="small-text mt-2">{{ topic.latest_update|safe }}</div>
             </div>
             <div class="topic-status">
                 <!-- Delete Button with Trashcan Icon -->

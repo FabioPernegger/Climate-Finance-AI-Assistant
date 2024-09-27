@@ -16,7 +16,7 @@
     <div class="timeline-section mb-4">
         <div class="timeline d-flex justify-content-around">
             {% for report_entry in query_reports %}
-                <a href="{% url 'report' report_entry.id %}" class="btn {% if report_entry.id == report.id %}btn-primary{% else %}btn-light{% endif %}">
+                <a href="{% url 'report' report_entry.id %}" class="btn {% if report_entry.id == report.id %}btn-warning{% else %}btn-light{% endif %}">
                     {{ report_entry.creation_day|date:"F jS" }}
                 </a>
             {% endfor %}
@@ -43,7 +43,7 @@
                         <h5 class="card-title">State of Knowledge</h5>
                         <!-- Increase the size of the textarea by increasing the height -->
                         <textarea id="report_text_editor" name="report_text">{{ report.text|safe }}</textarea>
-                        <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+                        <button type="submit" class="btn btn-warning mt-3">Save Changes</button>
                     </div>
                 </div>
             </form>
@@ -76,21 +76,21 @@
                         <ul class="pagination justify-content-center mt-3">
                             {% if page_obj.has_previous %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                                <a class="page-link btn-warning text-dark" href="?page={{ page_obj.previous_page_number }}">Previous</a>
                             </li>
                             {% endif %}
                             {% for num in paginator.page_range %}
                             <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                <a class="page-link btn-warning text-dark {% if page_obj.number == num %}active-btn{% endif %}" href="?page={{ num }}">{{ num }}</a>
                             </li>
                             {% endfor %}
                             {% if page_obj.has_next %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                                <a class="page-link btn-warning text-dark" href="?page={{ page_obj.next_page_number }}">Next</a>
                             </li>
                             {% endif %}
                         </ul>
-                    </nav>
+</nav>
                 </div>
             </div>
 
@@ -117,7 +117,7 @@
       </div>
       <div class="modal-body">
         <p id="article-full-text">Full article text will go here.</p>
-        <a href="#" id="article-original-link" class="btn btn-primary" target="_blank">Read Full Article</a>
+        <a href="#" id="article-original-link" class="btn btn-warning" target="_blank">Read Full Article</a>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

@@ -102,7 +102,7 @@ class UpdatedReport(BaseModel):
     report: str
     updates: str
 
-def generate_updated_report(client: OpenAI, query: str, previous_report: str, articles: List[dict], max_tokens=1000, temperature=0, top_p=0):
+def generate_updated_report(client: OpenAI, query: str, previous_report: str, articles: List[dict], max_tokens=2000, temperature=0, top_p=0):
     """
     Generates an updated report based on a query, articles (with title and text), and optionally a previous report.
     If no previous report is provided, generates a new report based solely on the articles.
@@ -110,23 +110,25 @@ def generate_updated_report(client: OpenAI, query: str, previous_report: str, ar
 
     # Prepare the system prompt depending on whether there is a previous report
     if previous_report:
-        system_prompt = '''You receive as input a QUERY, a PREVIOUS REPORT, and a list of ARTICLES. 
-        Create a report based on the PREVIOUS REPORT and the new ARTICLES which add fresh infromation 
-        to the PREVIOUS REPORT. The Aim of the report is to give a comprehensive understanding of the 
-        proposed topic by the QUERY. Use HTML to structure the report well, using bulletpoints and 
+        system_prompt = '''You receive as input a QUERY, a PREVIOUS REPORT, and a list of ARTICLES.
+        Compare the PREVIOUS REPORT with the new information gained from the ARTICLES, gather all the changes
+        and compile them also with HTML into a concise Update with some important bulletpoints.
+        Return this update in "updates". Create a report based on the PREVIOUS REPORT and the new ARTICLES 
+        which add fresh infromation to the PREVIOUS REPORT, make sure to integrate all the new updates into 
+        the report. The Aim of the report is to extract the most important information Of the ARTICLES combine 
+        it with the existing knowledge of the previous report and display it in a structured way to adress the QUERY. Use HTML to structure the report well, using bulletpoints and 
         headlines, with all important insights that are provided by ARTICLES and the PREVIOUS REPORT.
-        Return this report as the "report".Then, compare it with the PREVIOUS REPORT, gather all the changes
-        done to the report and compile them also with HTML into a short Update with some important bulletpoints.
-        Return this update in "updates".'''
+        Return this report as the "report", make sure the report does not get too long.'''
     else:
         system_prompt = '''You receive as input a QUERY and a list of ARTICLES. 
-        Create a report based on the ARTICLES. The Aim of the report is to give a comprehensive understanding of the 
-        proposed topic by the QUERY. Use HTML to structure the report well, using bulletpoints and 
-        headlines, with all important insights that are provided by ARTICLES.
+        Create a report based on the ARTICLES. The Aim of the report is to extract the most important 
+        information Of the ARTICLES combine it with the existing knowledge of the previous report and 
+        display it in a structured way to adress the QUERY. Use HTML to structure the report well, using 
+        bulletpoints and headlines, with all important insights that are provided by ARTICLES.
         Return this report as the "report".'''
 
     # Prepare the user prompt, including both article titles and truncated text
-    articles_text = "\n".join([f"ARTICLE {article['id']}: {article['title']}: {article['text'][:500]}" for article in articles])
+    articles_text = "\n".join([f"ARTICLE {article['id']}: {article['title'][:500]}: {article['text'][:500]}" for article in articles[:5]])
     user_prompt = f'QUERY: {query}\nPREVIOUS REPORT: {previous_report or "None"}\nARTICLES: {articles_text}'
 
     try:
