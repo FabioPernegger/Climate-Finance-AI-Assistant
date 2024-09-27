@@ -99,7 +99,7 @@ def generate_forecast(client, query, text, max_tokens=200, temperature=0, top_p=
 
 # generate an updated report
 class UpdatedReport(BaseModel):
-    updated_summary: str
+    report: str
     updates: str
 
 def generate_updated_report(client: OpenAI, query: str, previous_report: str, articles: List[dict], max_tokens=1000, temperature=0, top_p=0):
@@ -110,17 +110,23 @@ def generate_updated_report(client: OpenAI, query: str, previous_report: str, ar
 
     # Prepare the system prompt depending on whether there is a previous report
     if previous_report:
-        system_prompt = '''Take an input of a query, a previous report, and a list of articles. 
-        Create an updated report based on the query, correcting and completing any missing information 
-        based on the articles. Return this updated report as the "updated_summary".
-        Then, gather all the changes done to the report and create a list containing 
-        the changes made to update the report. Return this list in "updates".'''
+        system_prompt = '''You receive as input a QUERY, a PREVIOUS REPORT, and a list of ARTICLES. 
+        Create a report based on the PREVIOUS REPORT and the new ARTICLES which add fresh infromation 
+        to the PREVIOUS REPORT. The Aim of the report is to give a comprehensive understanding of the 
+        proposed topic by the QUERY. Use HTML to structure the report well, using bulletpoints and 
+        headlines, with all important insights that are provided by ARTICLES and the PREVIOUS REPORT.
+        Return this report as the "report".Then, compare it with the PREVIOUS REPORT, gather all the changes
+        done to the report and compile them also with HTML into a short Update with some important bulletpoints.
+        Return this update in "updates".'''
     else:
-        system_prompt = '''Take an input of a query and a list of articles. Create a new report based on 
-        the query using the articles. Return this report as the "updated_summary".'''
+        system_prompt = '''You receive as input a QUERY and a list of ARTICLES. 
+        Create a report based on the ARTICLES. The Aim of the report is to give a comprehensive understanding of the 
+        proposed topic by the QUERY. Use HTML to structure the report well, using bulletpoints and 
+        headlines, with all important insights that are provided by ARTICLES.
+        Return this report as the "report".'''
 
     # Prepare the user prompt, including both article titles and truncated text
-    articles_text = "\n".join([f"Article {article['id']}: {article['title']}: {article['text'][:500]}" for article in articles])
+    articles_text = "\n".join([f"ARTICLE {article['id']}: {article['title']}: {article['text'][:500]}" for article in articles])
     user_prompt = f'QUERY: {query}\nPREVIOUS REPORT: {previous_report or "None"}\nARTICLES: {articles_text}'
 
     try:
@@ -141,14 +147,14 @@ def generate_updated_report(client: OpenAI, query: str, previous_report: str, ar
         structured_response = completion.choices[0].message.parsed
 
         return {
-            "updated_summary": structured_response.updated_summary,
+            "report": structured_response.report,
             "updates": structured_response.updates,
         }
 
     except Exception as e:
         print(f"Error generating report: {e}")
         return {
-            "updated_summary": None,
+            "report": None,
             "updates": None,
         }
 

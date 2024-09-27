@@ -20,11 +20,11 @@ def create_report(client, query, topic, articles, previous_report=None, max_toke
     )
 
     # Check if the report was successfully generated
-    if updated_report_data.get("updated_summary"):
+    if updated_report_data.get("report"):
         # Create a new report in the database, setting the basis as the previous report if it exists
         new_report = Report.objects.create(
             creation_day=date.today(),
-            text=updated_report_data["updated_summary"],  # Use the generated report text
+            text=updated_report_data["report"],  # Use the generated report text
             basis=previous_report,  # Set the basis as the previous report if it exists
             update=updated_report_data.get("updates", ""),  # Use the generated update text
             query=query,

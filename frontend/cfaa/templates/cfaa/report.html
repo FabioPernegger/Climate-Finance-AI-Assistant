@@ -41,6 +41,7 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <h5 class="card-title">State of Knowledge</h5>
+                        <!-- Increase the size of the textarea by increasing the height -->
                         <textarea id="report_text_editor" name="report_text">{{ report.text|safe }}</textarea>
                         <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
                     </div>
@@ -92,6 +93,16 @@
                     </nav>
                 </div>
             </div>
+
+            <!-- Placeholder for Future Graph -->
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Coming Soon</h5>
+                    <p>Graph and Analysis Features</p>
+                    <!-- Placeholder image -->
+                    <img src="{% static 'cfaa/images/graph_placeholder.jpg' %}" alt="Graph Placeholder" class="img-fluid" />
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -125,7 +136,7 @@
         menubar: false,
         plugins: 'lists link image table',
         toolbar: 'undo redo | bold italic | bullist numlist | link image | table',
-        height: 300,
+        height: 600,  // Increase height for easier editing
         setup: function (editor) {
             editor.on('change', function () {
                 editor.save();  // Ensure the editor content is synced with the textarea for form submission
