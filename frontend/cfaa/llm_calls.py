@@ -26,16 +26,13 @@ def generate_summary(client, query, title, text, max_tokens=200, temperature=0, 
 
 
 # generates a summary based on multiple articles in order to answer a query
-def generate_summary_over_articles(client, query, articles, max_tokens=200, temperature=0, top_p=0.5):
-    system_prompt = f'''You are provided with a QUERY and multiple articles (ARTICLE 1, ARTICLE 2, etc.) from a 
-    certain time period. Write a concise summary of 3-5 sentences that captures the general opinion regarding the 
-    query during this time. Start with the most pertinent information directly, avoiding any introductory phrases or 
-    general background. Ensure that the summary is focused on the key insights and opinions drawn from the articles.'''
+def generate_summary_over_articles(client, query, articles, max_tokens=300, temperature=0, top_p=0.5):
+    system_prompt = f'''You are provided with a QUERY and multiple articles (ARTICLE 1, ARTICLE 2, etc.). Write a concise summary of 3-5 sentences that captures the general opinion regarding the 
+    query. Start with the most pertinent information directly, avoiding any introductory phrases or 
+    general background. Ensure that the summary is focused on the key insights and opinions drawn from the articles and relevant to the query.'''
 
     user_prompt = f'QUERY: {query}'
     for i, article in enumerate(articles):
-        if i > 5:
-            break
         user_prompt += f', ARTICLE {i + 1}: {article}'
 
     response = client.chat.completions.create(

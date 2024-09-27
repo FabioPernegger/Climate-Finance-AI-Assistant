@@ -9,7 +9,7 @@
 <div class="container my-5 fixed-layout">
     <!-- Question Section (Fixed) -->
     <div class="question-section mb-4">
-        <h5 class="question-text" data-query-id="{{ query_id }}" data-query="{{ query.text }}">
+        <h5 class="question-text" data-query-id="{{ query.id }}" data-query="{{ query.text }}">
             {{ query.text }}
         </h5>
     </div>
@@ -132,6 +132,26 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    const articleTiles = document.querySelectorAll('.article-tile');
+    articleTiles.forEach(function(tile) {
+        tile.addEventListener('click', function() {
+            const articleTitle = this.getAttribute('data-article-title');
+            const articleText = this.getAttribute('data-article-text');
+            const articleUrl = this.getAttribute('data-article-url');
+
+            // Update the modal content with the article details
+            document.getElementById('articleModalLabel').textContent = articleTitle;
+            document.getElementById('article-full-text').textContent = articleText;
+            const articleLink = document.getElementById('article-original-link');
+            articleLink.href = articleUrl;
+            articleLink.textContent = 'Read Full Article';
+
+            // Show the modal
+            const articleModal = new bootstrap.Modal(document.getElementById('articleModal'));
+            articleModal.show();
+        });
+    });
 
     // Function to get CSRF token (Django requires CSRF tokens for POST requests)
     function getCSRFToken() {

@@ -125,7 +125,6 @@ def discovery_page(request):
         # Prepare the context for the template
         context = {
             'query': query,
-            'query_id': query.id,  # Pass the query ID
             'articles': articles,
             'is_monitored': is_monitored  # Pass the monitoring flag
         }

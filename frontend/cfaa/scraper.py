@@ -26,7 +26,7 @@ def scrape_and_store_news(query_text, search_query):
 
     try:
         # Create and save the query in the database
-        query = Query.objects.create(text=query_text, search_query=search_query, article_summary='')
+        query = Query.objects.create(text=query_text, search_query=search_query, article_summary='null')
 
         # Get today's date and 7 days ago
         today = datetime.now()
@@ -56,10 +56,6 @@ def scrape_and_store_news(query_text, search_query):
                 if not article.title or not article.text:
                     continue
 
-                # Optional: Summarize the article text (e.g., first 50 words as a summary)
-                article_summary = ' '.join(article.text.split()[:50])
-                all_summaries.append(article_summary)
-
                 # Store the article in the database
                 ArticleModel.objects.create(
                     query=query,
@@ -67,16 +63,12 @@ def scrape_and_store_news(query_text, search_query):
                     title=article.title,
                     text=article.text,
                     url=url,
-                    summary=article_summary
+                    summary=''
                 )
 
             except ArticleException as e:
                 print(f"Failed to download article from {url}: {str(e)}")
                 continue
-
-        # After processing articles, store all summaries in the query's article_summary field
-        query.article_summary = ' '.join(all_summaries)
-        query.save()
 
         return "News articles successfully scraped and stored."
 

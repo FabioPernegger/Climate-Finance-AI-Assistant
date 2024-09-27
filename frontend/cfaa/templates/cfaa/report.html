@@ -31,8 +31,7 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">Update</h5>
-                    <!-- Show the updated information here -->
-                    <p class="card-text">{{ report.update|safe }}</p> <!-- Ensure that HTML is rendered -->
+                    <p class="card-text">{{ report.update|safe }}</p>
                 </div>
             </div>
 
@@ -42,8 +41,7 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <h5 class="card-title">State of Knowledge</h5>
-                        <!-- TinyMCE Editor for the report.text field -->
-                        <textarea id="report_text_editor" name="report_text">{{ report.text|safe }}</textarea> <!-- Safe filter ensures HTML is rendered -->
+                        <textarea id="report_text_editor" name="report_text">{{ report.text|safe }}</textarea>
                         <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
                     </div>
                 </div>
@@ -54,14 +52,17 @@
         <div class="col-lg-4">
             <div class="card mb-4">
                 <div class="card-body">
-                    <h5 class="card-title">Relevant Articles</h5> <!-- Adjusted title to show relevance -->
+                    <h5 class="card-title">Relevant Articles</h5>
                     <div class="related-articles">
                         {% if page_obj %}
                             {% for article in page_obj %}
-                            <div class="article-box mb-3">
+                            <div class="article-box mb-3" style="cursor: pointer;"
+                                 data-article-id="{{ article.id }}"
+                                 data-article-title="{{ article.title }}"
+                                 data-article-text="{{ article.text }}"
+                                 data-article-url="{{ article.url }}">
                                 <h6>{{ article.title }}</h6>
                                 <p>{{ article.text|truncatewords:25 }}</p>
-                                <a href="{{ article.url }}" target="_blank" class="btn btn-primary">Read more</a>
                             </div>
                             {% endfor %}
                         {% else %}
@@ -95,6 +96,25 @@
     </div>
 </div>
 
+<!-- Modal for showing full article content -->
+<div class="modal fade" id="articleModal" tabindex="-1" aria-labelledby="articleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="articleModalLabel">Article Title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="article-full-text">Full article text will go here.</p>
+        <a href="#" id="article-original-link" class="btn btn-primary" target="_blank">Read Full Article</a>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Include TinyMCE CDN -->
 <script src="https://cdn.tiny.cloud/1/0z9qhkgqssq6s2vutt5vici795t9k3lp6z3bef4wncbc2os9/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 
@@ -112,5 +132,29 @@
             });
         }
     });
+
+    // Add event listeners for the article boxes
+    document.addEventListener('DOMContentLoaded', function() {
+        const articleBoxes = document.querySelectorAll('.article-box');
+        articleBoxes.forEach(function(box) {
+            box.addEventListener('click', function() {
+                const articleTitle = this.getAttribute('data-article-title');
+                const articleText = this.getAttribute('data-article-text');
+                const articleUrl = this.getAttribute('data-article-url');
+
+                // Update the modal content with the article details
+                document.getElementById('articleModalLabel').textContent = articleTitle;
+                document.getElementById('article-full-text').textContent = articleText;
+                const articleLink = document.getElementById('article-original-link');
+                articleLink.href = articleUrl;
+                articleLink.textContent = 'Read Full Article';
+
+                // Show the modal
+                const articleModal = new bootstrap.Modal(document.getElementById('articleModal'));
+                articleModal.show();
+            });
+        });
+    });
 </script>
+
 {% endblock %}
