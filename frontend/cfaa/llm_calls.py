@@ -148,7 +148,7 @@ def generate_updated_report(client: OpenAI, query: str, previous_report: str, ar
 
         return {
             "report": structured_response.report,
-            "updates": structured_response.updates,
+            "updates": structured_response.updates if structured_response.updates != None else 'No updates yet.',
         }
 
     except Exception as e:

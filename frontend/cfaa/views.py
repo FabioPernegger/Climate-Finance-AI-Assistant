@@ -103,7 +103,7 @@ def discovery_page(request):
                 summary = generate_summary_over_articles(
                     client,
                     query.text,  # Pass query as a string (query.text)
-                    article_texts,  # Pass articles as an array of strings (article texts)
+                    article_texts[:5],  # Pass articles as an array of strings (article texts)
                     max_tokens=200,
                     temperature=0,
                     top_p=0.5
