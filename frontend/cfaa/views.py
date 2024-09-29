@@ -15,7 +15,7 @@ from django.views.decorators.http import require_http_methods
 from .scraper import scrape_and_store_news
 from .llm_calls import generate_summary_over_articles, generate_updated_report
 import json
-from .report_generator import create_report
+from .report_generator import create_report, generate_reports_for_last_six_months
 
 
 
@@ -43,7 +43,7 @@ def dashboard(request):
                 'id': topic.id,  # Add the topic ID
                 'title': topic.title,
                 'new_articles': topic.articles.count(),  # Get the count of associated articles
-                'status': 'No significant changes',  # Adjust the logic to determine the status
+                'latest_update': latest_report.update if latest_report else 'No update available',  # Get the latest report update or show a placeholder
                 'url': report_url  # Link to the latest report if available
             })
 
@@ -216,5 +216,29 @@ def monitor_question(request):
 
     # Return error if not POST request
     return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+def generate_demo_data_view(request):
+    """
+    View to generate demo data, including a new topic, scraped articles, and reports.
+    """
+    # Example query text and search query for demo purposes
+    env = environ.Env()
+    environ.Env.read_env()
+    OPENAI_API_KEY = env('OPENAI_API_KEY')
+    client = OpenAI(api_key=OPENAI_API_KEY)
+
+    query_text = "Who will win th US election?"
+    search_query = "Who will win th US election?"
+
+    # Create a new topic
+    new_topic = Topic.objects.create(title=query_text)
+
+
+    # Call the function to generate reports for the last 6 months
+    generate_reports_for_last_six_months(client, query_text, search_query, new_topic)
+
+    # Redirect back to the dashboard (or any other page)
+    return redirect('dashboard')
 
 
