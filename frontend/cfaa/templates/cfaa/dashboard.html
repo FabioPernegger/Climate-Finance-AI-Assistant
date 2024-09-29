@@ -9,7 +9,11 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <div class="container my-5">
-    <h3>Monitored Topics</h3>
+    <div class="question-section mb-4 py-3">
+        <h1 class="question-text text-center fw-bold" style="font-size: 2rem;" data-query-id="{{ query.id }}" data-query="{{ query.text }}">
+            Monitored Topics
+        </h1>
+    </div>
 
     {% if has_topics %}
     <!-- Display monitored topics -->
@@ -29,9 +33,16 @@
                     <!-- Display the latest report update if available -->
                     {% if topic.latest_update %}
                     <div class="mt-3">
-                        <h6 class="text-muted">Latest Update</h6>
+                        <h6 class="text-muted">Latest Update:</h6>
                         <div class="text-secondary">
                             {{ topic.latest_update|safe }}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="mt-3">
+                        <h6 class="text-muted">Latest Update:</h6>
+                        <div class="text-secondary">
+                            No Updates available yet.
                         </div>
                     </div>
                     {% endif %}
