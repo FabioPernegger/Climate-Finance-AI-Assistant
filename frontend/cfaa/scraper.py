@@ -55,6 +55,8 @@ def scrape_and_store_news(query_text, search_query, start_date=datetime.today(),
                 # Skip articles without key fields
                 if not article.title or not article.text:
                     continue
+                elif article.title == 'Subscribe to read':
+                    continue
 
                 # Store the article in the database
                 ArticleModel.objects.create(

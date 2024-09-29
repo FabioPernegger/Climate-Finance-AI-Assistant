@@ -228,8 +228,8 @@ def generate_demo_data_view(request):
     OPENAI_API_KEY = env('OPENAI_API_KEY')
     client = OpenAI(api_key=OPENAI_API_KEY)
 
-    query_text = "Who will win th US election?"
-    search_query = "Who will win th US election?"
+    query_text = "Who will win the US election?"
+    search_query = "Who will win the US election?"
 
     # Create a new topic
     new_topic = Topic.objects.create(title=query_text)
