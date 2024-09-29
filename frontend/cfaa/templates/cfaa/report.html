@@ -9,7 +9,7 @@
 <div class="container my-5">
     <!-- Question Section -->
     <div class="question-section mb-4">
-        <h5 class="question-text">{{ query }}</h5>
+        <h2 class="question-text">{{ query }}</h2>
     </div>
 
     <!-- Timeline Section -->
@@ -31,7 +31,7 @@
             {% if report.update|safe %}
             <div class="card mb-4">
                 <div class="card-body">
-                    <h5 class="card-title">Update</h5>
+                    <h3 class="card-title"> Update to {{ report.basis.creation_day|date:"F jS, Y" }}</h3>
                     <p class="card-text">{{ report.update|safe }}</p>
                 </div>
             </div>
@@ -42,13 +42,18 @@
                 {% csrf_token %}
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h5 class="card-title">State of Knowledge</h5>
+                        <h3 class="card-title">State of Knowledge Report of {{ report.creation_day|date }}</h3>
                         <!-- Increase the size of the textarea by increasing the height -->
                         <textarea id="report_text_editor" name="report_text">{{ report.text|safe }}</textarea>
-                        <button type="submit" class="btn btn-warning mt-3">Save Changes</button>
+
+                        <!-- Full-width button -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-warning btn-lg">Save Changes</button>
+                        </div>
                     </div>
                 </div>
             </form>
+
         </div>
 
         <!-- Right Column (Related Articles with Pagination) -->
