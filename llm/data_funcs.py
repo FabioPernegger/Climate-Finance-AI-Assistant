@@ -1,6 +1,6 @@
 import sqlite3
 
-db_path = '../frontend/db.sqlite3'
+db_path = 'frontend/db.sqlite3'
 
 def fetch_articles(year=None, month=None, query_id=None):
 

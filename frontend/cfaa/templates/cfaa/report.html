@@ -28,12 +28,14 @@
         <!-- Left Column (Main Report) -->
         <div class="col-lg-8">
             <!-- Update Section (Non-Editable) -->
+            {% if report.update|safe %}
             <div class="card mb-4">
                 <div class="card-body">
                     <h5 class="card-title">Update</h5>
                     <p class="card-text">{{ report.update|safe }}</p>
                 </div>
             </div>
+            {% endif %}
 
             <!-- Form for Editable State of Knowledge -->
             <form method="POST">

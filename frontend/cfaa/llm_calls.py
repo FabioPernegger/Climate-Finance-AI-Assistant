@@ -111,21 +111,23 @@ def generate_updated_report(client: OpenAI, query: str, previous_report: str, ar
     # Prepare the system prompt depending on whether there is a previous report
     if previous_report:
         system_prompt = '''You receive as input a QUERY, a PREVIOUS REPORT, and a list of ARTICLES.
+        Create a report in HTML structure, mainly based on the ARTICLES and partly on the PREVIOUS REPORT,
+        focus heavily on the ARTICLES and do not base the new report on the PREVIOUS REPORT, also do 
+        not base it on your existing knowledge.
+        The Aim of the report is to extract the most important information Of the ARTICLES and PREVIOUS REPORT 
+        and display it in a structured way to adress the QUERY. Use HTML to structure the report well, using 
+        bulletpoints, bold text and headlines. Return this report as the "report", make sure the report 
+        does not get too long.
         Compare the PREVIOUS REPORT with the new information gained from the ARTICLES, gather all the changes
-        and compile them also with HTML into a concise Update with some important bulletpoints.
-        Return this update in "updates". Create a report based on the PREVIOUS REPORT and the new ARTICLES 
-        which add fresh infromation to the PREVIOUS REPORT, make sure to integrate all the new updates into 
-        the report. The Aim of the report is to extract the most important information Of the ARTICLES combine 
-        it with the existing knowledge of the previous report and display it in a structured way to adress the QUERY. Use HTML to structure the report well, using bulletpoints and 
-        headlines, with all important insights that are provided by ARTICLES and the PREVIOUS REPORT.
-        Return this report as the "report", make sure the report does not get too long.'''
+        and compile them also with HTML (same formatting) into a concise Update with some important bulletpoints.
+        Return this update in "updates". Do not include a title for the updates.'''
     else:
         system_prompt = '''You receive as input a QUERY and a list of ARTICLES. 
-        Create a report based on the ARTICLES. The Aim of the report is to extract the most important 
-        information Of the ARTICLES combine it with the existing knowledge of the previous report and 
+        Create a report based on only the ARTICLES, not on your existing knowledge. The Aim of the 
+        report is to extract the most important information Of the ARTICLES and 
         display it in a structured way to adress the QUERY. Use HTML to structure the report well, using 
-        bulletpoints and headlines, with all important insights that are provided by ARTICLES.
-        Return this report as the "report".'''
+        bulletpoints, bold text and headlines, with all important insights that are provided by ARTICLES.
+        Return this report as the "report".'''   
 
     # Prepare the user prompt, including both article titles and truncated text
     articles_text = "\n".join([f"ARTICLE {article['id']}: {article['title'][:500]}: {article['text'][:500]}" for article in articles[:5]])

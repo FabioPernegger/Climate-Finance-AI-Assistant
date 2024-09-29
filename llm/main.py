@@ -11,7 +11,6 @@ openai_api_key = os.getenv("OPENAI_KEY")
 
 client = OpenAI(api_key=openai_api_key)
 
-print(openai_api_key)
 # Get query text based on id
 query_id = 1
 query = fetch_query(query_id=query_id)
