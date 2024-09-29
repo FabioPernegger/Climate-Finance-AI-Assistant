@@ -8,10 +8,10 @@
 <link href="{% static 'cfaa/css/main.css' %}" rel="stylesheet">
 <div class="container my-5 fixed-layout">
     <!-- Question Section (Fixed) -->
-    <div class="question-section mb-4">
-        <h5 class="question-text" data-query-id="{{ query.id }}" data-query="{{ query.text }}">
+    <div class="question-section mb-4 py-3">
+        <h1 class="question-text text-center fw-bold" style="font-size: 2rem;" data-query-id="{{ query.id }}" data-query="{{ query.text }}">
             {{ query.text }}
-        </h5>
+        </h1>
     </div>
 
     <!-- Articles and Summary Grid -->
@@ -22,8 +22,12 @@
                 {% if articles %}
                     {% for article in articles %}
                     <div class="col-md-6 mb-4">
-                        <!-- Make the whole card clickable -->
-                        <div class="card article-tile" style="cursor: pointer;" data-article-id="{{ article.id }}" data-article-text="{{ article.text }}" data-article-title="{{ article.title }}" data-article-url="{{ article.url }}">
+                        <!-- Improved card styling with hover effect -->
+                        <div class="card article-tile shadow-sm h-100" style="cursor: pointer; transition: transform 0.3s; border-radius: 10px;"
+                             data-article-id="{{ article.id }}"
+                             data-article-text="{{ article.text }}"
+                             data-article-title="{{ article.title }}"
+                             data-article-url="{{ article.url }}">
                             <div class="card-body">
                                 <h5 class="card-title">{{ article.title }}</h5>
                                 <p class="card-text">{{ article.text|truncatewords:50 }}</p>
@@ -70,17 +74,22 @@
 <div class="modal fade" id="articleModal" tabindex="-1" aria-labelledby="articleModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header bg-light">
         <h5 class="modal-title" id="articleModalLabel">Article Title</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <p id="article-full-text">Full article text will go here.</p>
-        <a href="#" id="article-original-link" class="btn btn-primary" target="_blank">Read Full Article</a>
+      <div class="modal-body" style="padding: 30px;">
+        <div id="article-full-text" style="font-size: 1.1rem; line-height: 1.6;">
+            <!-- Full article text will be inserted here -->
+        </div>
       </div>
-      <div class="modal-footer">
-        <!-- Close button at the bottom of the modal -->
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      <div class="modal-footer bg-light d-flex justify-content-between">
+        <!-- Prominent 'Read Full Article' button -->
+        <a href="#" id="article-original-link" class="btn btn-warning me-auto" target="_blank">
+            Read Full Article
+        </a>
+        <!-- Close button -->
+        <button type="button" class="btn btn-secondary ms-2" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
