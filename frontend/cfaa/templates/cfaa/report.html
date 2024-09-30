@@ -137,14 +137,39 @@
 <script src="https://cdn.tiny.cloud/1/0z9qhkgqssq6s2vutt5vici795t9k3lp6z3bef4wncbc2os9/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 
 <!-- Initialize TinyMCE for the Report Text Editor -->
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<!-- Initialize TinyMCE for the Report Text Editor -->
 <script>
-    tinymce.init({
+     tinymce.init({
         selector: '#report_text_editor',
         menubar: false,
         plugins: 'lists link image table',
-        toolbar: 'undo redo | bold italic | bullist numlist | link image | table',
+        toolbar: 'undo redo | bold italic | bullist numlist | link image | table exportpdf',
         height: 600,  // Increase height for easier editing
         setup: function (editor) {
+            // Add custom button to the toolbar
+            editor.ui.registry.addButton('exportpdf', {
+                text: 'Export to PDF',
+                onAction: function () {
+                    // Get the content of the editor
+                    const reportContent = editor.getContent();
+                    const reportTitle = "{{ query }} - Report {{ report.creation_day|date }}";
+
+                    // Create a Blob with PDF content
+                    const blob = new Blob([reportContent], { type: 'application/pdf' });
+
+                    // Create a download link for the PDF
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `${reportTitle}.pdf`;
+
+                    // Trigger the download
+                    link.click();
+                }
+            });
+
             editor.on('change', function () {
                 editor.save();  // Ensure the editor content is synced with the textarea for form submission
             });
